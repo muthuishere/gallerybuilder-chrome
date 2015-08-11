@@ -1,0 +1,30 @@
+{
+  
+  "manifest_version": 2,
+  "name": "Gallery Builder",
+  "short_name": "Gallery Builder",
+  "version": "1.0.0",
+
+
+  "description": "Automatically login to your favourite websites without entering credentials ",
+  "icons": {  
+   "48" : "images/gallerybuilder-48.png",
+   "64" : "images/gallerybuilder-64.png",
+    "128" : "images/gallerybuilder-128.png"
+	},
+
+
+  "author": "Muthukumaran Navaneethakrishnan(https://github.com/muthuishere)",
+ "background": { "scripts": ["scripts/Helper.js","global.js"] },
+ 
+  
+ "web_accessible_resources": [
+    "images/*.png",  
+	"images/*.jpg", 
+	"css/*.css",
+	"auth.html",
+	"scripts/*.js"
+  ], 
+  "permissions": ["tabs", "notifications","declarativeContent","webRequest","webRequestBlocking", "http://*/*", "https://*/*"]
+  
+}
