@@ -1,12 +1,12 @@
-var autoLoginOptions = {    
-    autologinXMLList: null,
+var gallerybuilderOptions = {    
+    gallerybuilderXMLList: null,
 	changedDomains:new Array(),
 	hasPassword:true,
 	validated:false,
 
 	createXMLElement:function(node,elemName){
 	
-	var xmldoc=autoLoginOptions.autologinXMLList;
+	var xmldoc=gallerybuilderOptions.gallerybuilderXMLList;
 	
 	newel=xmldoc.createElement(elemName);
 		
@@ -45,9 +45,9 @@ var autoLoginOptions = {
 
 			for (k = 0; k < elems.length; k++) {
 
-				if (autoLoginOptions.getXMLElementval(elems[k], "xpath") == xpath) {
+				if (gallerybuilderOptions.getXMLElementval(elems[k], "xpath") == xpath) {
 
-					autoLoginOptions.setXMLElementval(elems[k], "value", val)
+					gallerybuilderOptions.setXMLElementval(elems[k], "value", val)
 					return true;
 					
 				}
@@ -74,8 +74,8 @@ var autoLoginOptions = {
 				if(response.valid){
 				
 					//Click menu
-					autoLoginOptions.validated=true
-					autoLoginOptions.menuSitesClicked("");
+					gallerybuilderOptions.validated=true
+					gallerybuilderOptions.menuSitesClicked("");
 					
 					
 				
@@ -104,26 +104,26 @@ var autoLoginOptions = {
 		var xpath=event.target.getAttribute("xpath") 	
 			
 	 var domainrow=event.target.parentNode.parentNode;
-	  autoLoginOptions.changedDomains.push(domainrow.getAttribute("domainname"));
-	  var autoLoginObject=autoLoginOptions.searchdomain(domainrow.getAttribute("domainname"),domainrow.getAttribute("authtype"))
+	  gallerybuilderOptions.changedDomains.push(domainrow.getAttribute("domainname"));
+	  var gallerybuilderObject=gallerybuilderOptions.searchdomain(domainrow.getAttribute("domainname"),domainrow.getAttribute("authtype"))
 	  
 	event.target.className += ' inputChanged';
 	if(event.target.getAttribute("type")=="text"){
 	
-		autoLoginOptions.setXMLPathval(autoLoginObject,xpath,event.target.value)
+		gallerybuilderOptions.setXMLPathval(gallerybuilderObject,xpath,event.target.value)
 	
 	}else if(event.target.getAttribute("type")=="password"){
 		
-		autoLoginOptions.setXMLPathval(autoLoginObject,xpath,event.target.value)
+		gallerybuilderOptions.setXMLPathval(gallerybuilderObject,xpath,event.target.value)
 	
-	//autoLoginOptions.setXMLElementval(autoLoginObject,"password",event.target.value)
+	//gallerybuilderOptions.setXMLElementval(gallerybuilderObject,"password",event.target.value)
 	
 	}else if(event.target.getAttribute("type")=="checkbox"){
 	
 	if(event.target.checked)
-	  autoLoginOptions.setXMLElementval(autoLoginObject,"enabled","true")
+	  gallerybuilderOptions.setXMLElementval(gallerybuilderObject,"enabled","true")
 	 else
-		autoLoginOptions.setXMLElementval(autoLoginObject,"enabled","false")
+		gallerybuilderOptions.setXMLElementval(gallerybuilderObject,"enabled","false")
 	}
 	
 	},
@@ -139,7 +139,7 @@ var autoLoginOptions = {
 	document.querySelector("#divpasswordask").style.display="none";
 	document.querySelector("#divpasswordchange").style.display="none";
 	
-	autoLoginOptions.loadOptions();
+	gallerybuilderOptions.loadOptions();
 	
 	},
 	changePassword:function(pwd){
@@ -148,15 +148,15 @@ var autoLoginOptions = {
 					
 					if(response.valid){
 						
-							autoLoginOptions.flashdiv("statusSuccess","Successfully changed Password");
+							gallerybuilderOptions.flashdiv("statusSuccess","Successfully changed Password");
 								
-								autoLoginOptions.viewSettings();
+								gallerybuilderOptions.viewSettings();
 								
 						
 					}else{
 						//show sites
 							
-								autoLoginOptions.flashdiv("statusError","Error in Updating Password Password");
+								gallerybuilderOptions.flashdiv("statusError","Error in Updating Password Password");
 								document.querySelector("#txtnewpassword").focus(); 
 								return;
 					}
@@ -178,30 +178,30 @@ var autoLoginOptions = {
 
 	},
 	onBtnCancelChangePasswordClicked:function(event){
-	autoLoginOptions.viewSettings();
+	gallerybuilderOptions.viewSettings();
 	},
 	onBtnChangePasswordClicked:function(event){
 	
 	
 	if(document.querySelector("#txtnewpassword").value != document.querySelector("#txtrepeatnewpassword").value){
 	
-			autoLoginOptions.flashdiv("statusError","Both Passwords should be same");
+			gallerybuilderOptions.flashdiv("statusError","Both Passwords should be same");
 			document.querySelector("#txtnewpassword").focus(); 
 			return;
 	
 	}
 	
-	if(autoLoginOptions.hasPassword==true){
+	if(gallerybuilderOptions.hasPassword==true){
 	
 		chrome.extension.sendMessage({action: "validateCredential",info:document.querySelector("#txtoldpassword").value}, function(response) {
 					
 					if(response.valid){
 						
-						autoLoginOptions.changePassword(document.querySelector("#txtnewpassword").value)
+						gallerybuilderOptions.changePassword(document.querySelector("#txtnewpassword").value)
 						
 					}else{
 						//show sites
-					autoLoginOptions.flashdiv("statusError","Invalid Old Password");
+					gallerybuilderOptions.flashdiv("statusError","Invalid Old Password");
 								
 								document.querySelector("#txtoldpassword").focus(); 
 								return;
@@ -214,7 +214,7 @@ var autoLoginOptions = {
 	
 	}else{
 		
-		autoLoginOptions.changePassword(document.querySelector("#txtnewpassword").value)
+		gallerybuilderOptions.changePassword(document.querySelector("#txtnewpassword").value)
 	
 	}
 	// if old password is visible
@@ -232,7 +232,7 @@ var autoLoginOptions = {
 	document.querySelector("#divSites").style.display="none";
 	document.querySelector("#divpasswordask").style.display="none";
 	document.querySelector("#divpasswordchange").style.display="";
-	autoLoginOptions.loadSettings();
+	gallerybuilderOptions.loadSettings();
 	
 	
 	},
@@ -250,7 +250,7 @@ var autoLoginOptions = {
 	
 	 document.querySelector("input#txtaskpassword").addEventListener('keypress', function(event){
 		 if (event.which == 13 || event.keyCode == 13) {
-            autoLoginOptions.validateViewOptions();
+            gallerybuilderOptions.validateViewOptions();
             return false;
         }
         return true;
@@ -258,7 +258,7 @@ var autoLoginOptions = {
 		 
 		 
 	var buttonaskPassword = document.querySelector('input#btnaskpassword');
-		 buttonaskPassword.addEventListener('click', autoLoginOptions.validateViewOptions, false);
+		 buttonaskPassword.addEventListener('click', gallerybuilderOptions.validateViewOptions, false);
 		  document.querySelector("input#txtaskpassword").focus();
 		 
 	},
@@ -270,13 +270,13 @@ var autoLoginOptions = {
 				if(response.valid){
 				
 					//Show Password panel
-					autoLoginOptions.hasPassword=true;
-					autoLoginOptions.validated=false;
-					autoLoginOptions.showPasswordPane();
+					gallerybuilderOptions.hasPassword=true;
+					gallerybuilderOptions.validated=false;
+					gallerybuilderOptions.showPasswordPane();
 				}else{
 					//show sites
-					autoLoginOptions.hasPassword=false;
-					autoLoginOptions.menuSitesClicked("");
+					gallerybuilderOptions.hasPassword=false;
+					gallerybuilderOptions.menuSitesClicked("");
 				}
 					
 				
@@ -285,20 +285,20 @@ var autoLoginOptions = {
 				
 	
 	
-	document.querySelector('a#mnusites').addEventListener('click', autoLoginOptions.menuSitesClicked, false);
-	document.querySelector('a#mnuchangepassword').addEventListener('click', autoLoginOptions.menuChangePasswordClicked, false);
+	document.querySelector('a#mnusites').addEventListener('click', gallerybuilderOptions.menuSitesClicked, false);
+	document.querySelector('a#mnuchangepassword').addEventListener('click', gallerybuilderOptions.menuChangePasswordClicked, false);
 	
 		 
 		 
 	},
 	 loadChangePassword: function () {
 	
-			document.querySelector('#btnchangepassword').addEventListener('click', autoLoginOptions.onBtnChangePasswordClicked, false);
-			document.querySelector('#btncancelchangepassword').addEventListener('click', autoLoginOptions.onBtnCancelChangePasswordClicked, false);
+			document.querySelector('#btnchangepassword').addEventListener('click', gallerybuilderOptions.onBtnChangePasswordClicked, false);
+			document.querySelector('#btncancelchangepassword').addEventListener('click', gallerybuilderOptions.onBtnCancelChangePasswordClicked, false);
 			document.querySelector("#tblchangepwd").style.display="";
 			document.querySelector("#tblsettings").style.display="none";
 			 
-			 if(autoLoginOptions.hasPassword == false ){
+			 if(gallerybuilderOptions.hasPassword == false ){
 					document.querySelector("#rowoldpassword").style.display="none";
 		
 				}else{
@@ -321,7 +321,7 @@ var autoLoginOptions = {
 			//on change check box
 			
 			document.querySelector('#btnshowchangepwd').addEventListener('click', function(){
-					autoLoginOptions.loadChangePassword();
+					gallerybuilderOptions.loadChangePassword();
 			}, false);
 			
 			
@@ -329,9 +329,9 @@ var autoLoginOptions = {
 			chrome.extension.sendMessage({action: "getPromptAtStartup"}, function(response) {
 				
 						if(response.promptrequired == true)
-							document.querySelector('#chkpromptAutologin').setAttribute("CHECKED","CHECKED")
+							document.querySelector('#chkpromptgallerybuilder').setAttribute("CHECKED","CHECKED")
 						else	
-							document.querySelector('#chkpromptAutologin').removeAttribute("CHECKED")
+							document.querySelector('#chkpromptgallerybuilder').removeAttribute("CHECKED")
 				
 						});
 						
@@ -355,7 +355,7 @@ var autoLoginOptions = {
 			}, false);
 			
 				
-			document.querySelector('#chkpromptAutologin').addEventListener('click', function(event){
+			document.querySelector('#chkpromptgallerybuilder').addEventListener('click', function(event){
 					
 					
 					chrome.extension.sendMessage({action: "updatePromptAtStartup",promptrequired:event.target.checked}, function(response) {
@@ -377,10 +377,10 @@ var autoLoginOptions = {
 	
 	document.querySelector('#tblOptions').style.display="";
 			document.querySelector('#btnUpdate').style.display="";
-        var rawxml = Helper.decrypt(localStorage["autologinxml"]);
+        var rawxml = Helper.decrypt(localStorage["gallerybuilderxml"]);
 		
 		document.querySelector("a#btnUpdate").setAttribute("class", "buttondisable");
-       var tblCreated= autoLoginOptions.loadDocumentAndCreateTable(rawxml);
+       var tblCreated= gallerybuilderOptions.loadDocumentAndCreateTable(rawxml);
         //tblOptions
 		//Add
 		if(tblCreated){
@@ -389,7 +389,7 @@ var autoLoginOptions = {
         var removeElements = document.querySelectorAll('a.remove');
         for (var i = 0, removeElement; removeElement = removeElements[i]; i++) {
             //work with element
-            removeElement.addEventListener('click', autoLoginOptions.removeAutologin, false);
+            removeElement.addEventListener('click', gallerybuilderOptions.removegallerybuilder, false);
 
         }
 		
@@ -397,7 +397,7 @@ var autoLoginOptions = {
         for (var i = 0, inputElement; inputElement = inputElements[i]; i++) {
             //work with element
 			
-            inputElement.addEventListener('change', autoLoginOptions.infoChanged, false);
+            inputElement.addEventListener('change', gallerybuilderOptions.infoChanged, false);
 			 
 		
         }
@@ -413,8 +413,8 @@ var autoLoginOptions = {
 	
 	
 		 if (event.which == 13 || event.keyCode == 13) {
-			 autoLoginOptions.infoChanged(event)
-           autoLoginOptions.updateAutologin()
+			 gallerybuilderOptions.infoChanged(event)
+           gallerybuilderOptions.updategallerybuilder()
             return false;
         }
         return true;
@@ -422,7 +422,7 @@ var autoLoginOptions = {
 		
 		
 		 var buttonUpdate = document.querySelector('a#btnUpdate');
-		 buttonUpdate.addEventListener('click', autoLoginOptions.updateAutologin, false);
+		 buttonUpdate.addEventListener('click', gallerybuilderOptions.updategallerybuilder, false);
 		
 		}else{
 		//remove table and buttons
@@ -436,26 +436,26 @@ var autoLoginOptions = {
 
     },
 	
-    removeAutologin: function (event) {
+    removegallerybuilder: function (event) {
 
 	//find domain 
-	//remove from autologinxmllist
+	//remove from gallerybuilderxmllist
 	
 	document.querySelector("#sitechangedstatus").innerHTML="";
 	
 	document.querySelector("a#btnUpdate").setAttribute("class","button") ;
-	 var docxml=autoLoginOptions.autologinXMLList ;
+	 var docxml=gallerybuilderOptions.gallerybuilderXMLList ;
 	 
 	 var domainrow=event.target.parentNode.parentNode.parentNode;
 	
 	 var domainname=domainrow.getAttribute("domainname");
 	 
 	 
-	 var autoLoginObject=autoLoginOptions.searchdomain(domainname,domainrow.getAttribute("authtype"))
+	 var gallerybuilderObject=gallerybuilderOptions.searchdomain(domainname,domainrow.getAttribute("authtype"))
 	
 	 
-	 if(null != autoLoginObject)
-		autoLoginObject.parentNode.removeChild(autoLoginObject);
+	 if(null != gallerybuilderObject)
+		gallerybuilderObject.parentNode.removeChild(gallerybuilderObject);
 				
 	 
 	 domainrow.parentNode.removeChild(domainrow);
@@ -468,7 +468,7 @@ var autoLoginOptions = {
 searchdomain:function(domainname,authtype){
 		
 
-		var docxml=autoLoginOptions.autologinXMLList;
+		var docxml=gallerybuilderOptions.gallerybuilderXMLList;
 			
 		
 
@@ -481,8 +481,8 @@ searchdomain:function(domainname,authtype){
 		while (i--) {
 					
 				
-				iurl=autoLoginOptions.getXMLElementval(sites[i],"url");
-				if(autoLoginOptions.getdomainName(iurl)  == domainname &&  authtype == sites[i].getAttribute("authtype")  ){
+				iurl=gallerybuilderOptions.getXMLElementval(sites[i],"url");
+				if(gallerybuilderOptions.getdomainName(iurl)  == domainname &&  authtype == sites[i].getAttribute("authtype")  ){
 							
 							return sites[i];
 							
@@ -508,23 +508,23 @@ searchdomain:function(domainname,authtype){
 		
 	
 	},
-	updateAutologin:function(event){
+	updategallerybuilder:function(event){
 	
 		if(document.querySelector("a#btnUpdate").getAttribute("class") == "buttondisable" )
 			return;
 	
 	   var oSerializer = new XMLSerializer();
-        var rawxml = oSerializer.serializeToString(autoLoginOptions.autologinXMLList);
+        var rawxml = oSerializer.serializeToString(gallerybuilderOptions.gallerybuilderXMLList);
 	
-        localStorage["autologinxml"] = Helper.encrypt(rawxml);
+        localStorage["gallerybuilderxml"] = Helper.encrypt(rawxml);
 	
 		
 			chrome.extension.sendMessage({action: "refreshData"}, function(response) {
 				
-				autoLoginOptions.updateinputBoxStyle();
+				gallerybuilderOptions.updateinputBoxStyle();
 				
 				
-				autoLoginOptions.flashdiv("statusSuccess","Successfully Updated Information");
+				gallerybuilderOptions.flashdiv("statusSuccess","Successfully Updated Information");
 				document.querySelector("a#btnUpdate").setAttribute("class", "buttondisable");
 				
 				});
@@ -553,13 +553,13 @@ searchdomain:function(domainname,authtype){
 
         var dummyresp = '';
 
-        autoLoginOptions.autologinXMLList = docxml;
+        gallerybuilderOptions.gallerybuilderXMLList = docxml;
         var jsonresp = new Array();
-		autoLoginOptions.cleanTable();
+		gallerybuilderOptions.cleanTable();
 
      //   try {
 
-            //autoLoginOptions.logmessage(docxml );
+            //gallerybuilderOptions.logmessage(docxml );
             var divs = docxml.getElementsByTagName("site"),
                 i = divs.length;
            
@@ -569,59 +569,59 @@ searchdomain:function(domainname,authtype){
 
             while (i--) {
 
-                var autoLoginInfo = {};
-                autoLoginInfo.url = autoLoginOptions.getXMLElementval(divs[i], "url");
-				autoLoginInfo.authtype=divs[i].getAttribute("authtype")
+                var gallerybuilderInfo = {};
+                gallerybuilderInfo.url = gallerybuilderOptions.getXMLElementval(divs[i], "url");
+				gallerybuilderInfo.authtype=divs[i].getAttribute("authtype")
 
-                autoLoginInfo.loginurl = autoLoginOptions.getXMLElementval(divs[i], "loginurl");
-				autoLoginInfo.username="";
+                gallerybuilderInfo.loginurl = gallerybuilderOptions.getXMLElementval(divs[i], "loginurl");
+				gallerybuilderInfo.username="";
 				
-					autoLoginInfo.fields=[]
+					gallerybuilderInfo.fields=[]
 				  
 				  var elems = divs[i].getElementsByTagName("element");
 				  
 				  for( k=0;k< elems.length ;k++){
 					  
 					  var field={}
-					 field.xpath= autoLoginOptions.getXMLElementval(elems[k],"xpath");
-					 field.type= autoLoginOptions.getXMLElementval(elems[k],"type");
+					 field.xpath= gallerybuilderOptions.getXMLElementval(elems[k],"xpath");
+					 field.type= gallerybuilderOptions.getXMLElementval(elems[k],"type");
 					
-					 field.value= autoLoginOptions.getXMLElementval(elems[k],"value");
-					 field.event= autoLoginOptions.getXMLElementval(elems[k],"event");
+					 field.value= gallerybuilderOptions.getXMLElementval(elems[k],"value");
+					 field.event= gallerybuilderOptions.getXMLElementval(elems[k],"event");
 					  if(field.type === "password"){
-						 autoLoginInfo.password= field.value
-						  autoLoginInfo.pwdxpath= field.xpath
+						 gallerybuilderInfo.password= field.value
+						  gallerybuilderInfo.pwdxpath= field.xpath
 					 }
 					 
 					  if(field.type === "text"  ){
 					  
-						if( autoLoginInfo.username !== ""){
+						if( gallerybuilderInfo.username !== ""){
 						
 								if(field.value != "" && (field.xpath.indexOf("user") >=0 ||  field.xpath.indexOf("email") >=0 || field.xpath.indexOf("login") >=0 )){
-									autoLoginInfo.username= field.value
-									autoLoginInfo.userxpath= field.xpath
+									gallerybuilderInfo.username= field.value
+									gallerybuilderInfo.userxpath= field.xpath
 								
 								}
 								
 						}else{
-						 autoLoginInfo.username= field.value
-						  autoLoginInfo.userxpath= field.xpath
+						 gallerybuilderInfo.username= field.value
+						  gallerybuilderInfo.userxpath= field.xpath
 						  }
 					 }
-					autoLoginInfo.fields.push(field)
+					gallerybuilderInfo.fields.push(field)
 				  }
 				  
 				 
-                autoLoginInfo.enabled = autoLoginOptions.getXMLElementval(divs[i], "enabled");
+                gallerybuilderInfo.enabled = gallerybuilderOptions.getXMLElementval(divs[i], "enabled");
 				
-					autoLoginInfo.domain=autoLoginOptions.getdomainName( autoLoginInfo.url)
+					gallerybuilderInfo.domain=gallerybuilderOptions.getdomainName( gallerybuilderInfo.url)
 					
-                if (null == autoLoginInfo.enabled || "" == autoLoginInfo.enabled)
-                    autoLoginInfo.enabled = "true"
+                if (null == gallerybuilderInfo.enabled || "" == gallerybuilderInfo.enabled)
+                    gallerybuilderInfo.enabled = "true"
 				
-					autoLoginOptions.createRow(autoLoginInfo)				
+					gallerybuilderOptions.createRow(gallerybuilderInfo)				
 					flgTblCreated=true;
-                jsonresp.push(autoLoginInfo);
+                jsonresp.push(gallerybuilderInfo);
 				
             }
 
@@ -629,7 +629,7 @@ searchdomain:function(domainname,authtype){
 
             
 
-            //autoLoginOptions.logmessage(dummyresp);
+            //gallerybuilderOptions.logmessage(dummyresp);
 
             
        /* } catch (exception) {
@@ -666,30 +666,30 @@ searchdomain:function(domainname,authtype){
 			
 	
 	},
-	createRow:function(autoLoginInfo){
+	createRow:function(gallerybuilderInfo){
 	
 	
-			var autologinChecked=""
-			if(autoLoginInfo.enabled == "true"){
-				autologinChecked="CHECKED"
+			var gallerybuilderChecked=""
+			if(gallerybuilderInfo.enabled == "true"){
+				gallerybuilderChecked="CHECKED"
 			}
 			
 			 var row = document.querySelector("#tblOptions").insertRow(-1);
-row.setAttribute("domainname",autoLoginInfo.domain)
-row.setAttribute("authtype",autoLoginInfo.authtype)
+row.setAttribute("domainname",gallerybuilderInfo.domain)
+row.setAttribute("authtype",gallerybuilderInfo.authtype)
 
 var authtype="WebPage Authentication"
 var imagename="lock.png"
-if(autoLoginInfo.authtype == "basic"){
+if(gallerybuilderInfo.authtype == "basic"){
 	authtype="Basic Authentication"
 	imagename="shield.png"
 }
 	
-row.innerHTML =	 "<td style='text-align:left;max-width:150px;overflow:hidden' title='"+autoLoginInfo.domain+"'>"+ autoLoginInfo.domain+"</td>"+
+row.innerHTML =	 "<td style='text-align:left;max-width:150px;overflow:hidden' title='"+gallerybuilderInfo.domain+"'>"+ gallerybuilderInfo.domain+"</td>"+
 	"<td style='text-align:center'><img src='images/"+ imagename+"' title='"+authtype+"' class='btnDelete'/> </td>"+
-        "<td><input class='inp' type='text' xpath='"+autoLoginInfo.userxpath  +"' value='"+autoLoginInfo.username +"'/></td>"+
-		"<td><input class='inp' type='password' xpath='"+autoLoginInfo.pwdxpath  +"'  value='"+autoLoginInfo.password +"'/></td>"+
-		"<td><input class='inp' type='checkbox' value='1' "+autologinChecked +"  /></td>"+
+        "<td><input class='inp' type='text' xpath='"+gallerybuilderInfo.userxpath  +"' value='"+gallerybuilderInfo.username +"'/></td>"+
+		"<td><input class='inp' type='password' xpath='"+gallerybuilderInfo.pwdxpath  +"'  value='"+gallerybuilderInfo.password +"'/></td>"+
+		"<td><input class='inp' type='checkbox' value='1' "+gallerybuilderChecked +"  /></td>"+
         "<td> <a  class='remove' href='#'><img src='images/delete.png' class='btnDelete'/></a> </td>";
 	
 	}
@@ -705,14 +705,14 @@ row.innerHTML =	 "<td style='text-align:left;max-width:150px;overflow:hidden' ti
 
 
 
-window.addEventListener('load', autoLoginOptions.init);
+window.addEventListener('load', gallerybuilderOptions.init);
 
 
 
 /*
 
 
-var myString = '<div style="position:fixed;border:2px solid;border-radius:25px;background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#7abcff), color-stop(44%,#60abf8), color-stop(100%,#4096ee)); ;color:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(12%,#595959), color-stop(25%,#666666), color-stop(39%,#474747), color-stop(50%,#2c2c2c), color-stop(51%,#000000), color-stop(60%,#111111), color-stop(76%,#2b2b2b), color-stop(91%,#1c1c1c), color-stop(100%,#131313));right:202px;top:0px;height:200px;width:200px">   <table id="" style="width:100%" > <tbody> <tr> <th>Enter Master Password to activate AutoLogin:</th></tr><tr> <th> <input type="password" id="txtaskpassword" /> </th> </tr><tr>   <th> <input type="button" id="btnaskpassword" value="Activate" /> </th>   </tr> </tbody> </table> </div>'
+var myString = '<div style="position:fixed;border:2px solid;border-radius:25px;background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#7abcff), color-stop(44%,#60abf8), color-stop(100%,#4096ee)); ;color:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(12%,#595959), color-stop(25%,#666666), color-stop(39%,#474747), color-stop(50%,#2c2c2c), color-stop(51%,#000000), color-stop(60%,#111111), color-stop(76%,#2b2b2b), color-stop(91%,#1c1c1c), color-stop(100%,#131313));right:202px;top:0px;height:200px;width:200px">   <table id="" style="width:100%" > <tbody> <tr> <th>Enter Master Password to activate gallerybuilder:</th></tr><tr> <th> <input type="password" id="txtaskpassword" /> </th> </tr><tr>   <th> <input type="button" id="btnaskpassword" value="Activate" /> </th>   </tr> </tbody> </table> </div>'
 
 var container=document.createElement("div");
 container.innerHTML=myString

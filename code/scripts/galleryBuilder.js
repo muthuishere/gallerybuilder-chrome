@@ -2,7 +2,21 @@ if (undefined == GalleryBuilder) {
 
 	var CustomFunctions = {
 
-		getMonth : function (start, end, inc) {}
+		Number : function (value) {
+				
+				return value;
+		},
+		Character : function (index) {
+				return String.fromCharCode(index);
+		},
+		shortMonth : function (index) {
+		
+			return 	DataTypes.getMonthName(index-1,DataTypes.MONTH_SHORT)
+		},
+		longMonth : function (index) {
+		
+			return 	DataTypes.getMonthName(index-1,DataTypes.MONTH_LONG)
+		}
 
 	}
 
@@ -10,7 +24,7 @@ if (undefined == GalleryBuilder) {
 		NUMBER : 1,
 		CHARACTER : 2,
 		MONTH_LONG : 3,
-		MONTH_SHORT : 4,
+		MONTH_SHORT : 4,		
 		UNKNOWN : -1,
 		mL : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		mS : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
@@ -75,11 +89,35 @@ if (undefined == GalleryBuilder) {
 
 		tokens : 0,
 		delimeter : "[]",
-
+		methods:[],
+		getOptions : function () {
+			var res=""
+			for(method in GalleryBuilder.methods){
+				
+				res += "<option value='" + method.name + "' title='" + method.helptext +"'>"
+				
+			}
+			
+			return res;
+		},
+		getTokenCount:function(text){
+		
+		var count=1
+		
+		while(text.indexOf("$"+count) >0){
+		
+		count++
+		
+		}
+		
+		//decrement count to identify total count
+		return (count-1)
+		
+		},
 		onTextChange : function (text) {
 
 			//find the number of parantheses
-			GalleryBuilder.tokens = text.split(GalleryBuilder.delimeter).length - 1
+			GalleryBuilder.tokens = getTokenCount(text)
 
 				for (i = 0; i < GalleryBuilder.tokens; i++) {
 
@@ -103,7 +141,8 @@ if (undefined == GalleryBuilder) {
 
 			var row = document.querySelector("#tblOptions").insertRow(-1);
 			row.setAttribute("id", "row" + index)
-			row.innerHTML = "<td style='text-align:left;max-width:150px;overflow:hidden' ><input id='start" + index + "' type='text' value='' placeholder=" Start "></td>" +
+			row.innerHTML = "<td style='text-align:left;max-width:150px;overflow:hidden' ><select id='methodname" + index + "'>"+GalleryBuilder.getOptions()+"</select></td>" +
+			"<td style='text-align:center'><input id='start" + index + "' type='text' value='' placeholder=" Start "> </td>" +
 				"<td style='text-align:center'><input id='end" + index + "' type='text' value='' placeholder=" End "> </td>" +
 				"<td><input id='increment" + index + "' type='text' value='' placeholder=" Increment "> </td>"
 
@@ -125,6 +164,9 @@ if (undefined == GalleryBuilder) {
 					var endval = document.querySelector("#end" + i).value
 
 					var incrementval = document.querySelector("#increment" + i).value
+					var methodname = document.querySelector("#methodname" + i).value
+					
+					
 
 					if (incrementval == "")
 						incrementval = "1"
@@ -156,7 +198,8 @@ if (undefined == GalleryBuilder) {
 							}
 							var range = {}
 					range.index = i
-					range.datatype = DataTypes.checkType(startval)
+					range.datatype =DataTypes.checkType(startval)
+					range.methodname=methodname
 
 					range.start = startval
 					range.end = endval
@@ -196,6 +239,19 @@ if (undefined == GalleryBuilder) {
 			console.log(results)
 
 		},
+		getFunctionFromString:function(string)
+		{
+			var scope = window;
+			var scopeSplit = string.split('.');
+			for (i = 0; i < scopeSplit.length - 1; i++)
+			{
+				scope = scope[scopeSplit[i]];
+
+				if (scope == undefined) return;
+			}
+
+			return scope[scopeSplit[scopeSplit.length - 1]];
+		},
 
 		generateurls : function (template, pointer, ranges) {
 
@@ -223,7 +279,13 @@ if (undefined == GalleryBuilder) {
 						curval = String.fromCharCode(curindex);
 
 					} else if (range.datatype == DataTypes.NUMBER) {
-						curval = curindex
+					
+						var method=GalleryBuilder.getFunctionFromString("CustomFunctions." + range.methodname)
+						
+						if(method)
+							curval = method(curindex)
+						else
+							alert("Invalid function noted")
 
 					} else if (range.datatype == DataTypes.MONTH_SHORT) {
 
@@ -247,8 +309,25 @@ if (undefined == GalleryBuilder) {
 				}
 
 		},
+		getMethodhelptext:function (name){
+			
+			return "";
+		},
+		getMethods:function (){
+			var res = [];
+			for(var m in CustomFunctions) {
+				if(typeof CustomFunctions[m] == "function") {
+				var mobj={}
+					mobj.helptext=GalleryBuilder.getMethodhelptext(m)
+					mobj.name=m
+					res.push(mobj)
+				}
+			}
+			return res;
+		},
 		init : function () {
 		
+			GalleryBuilder.methods=GalleryBuilder.getMethods()
 		
 		
 		}
