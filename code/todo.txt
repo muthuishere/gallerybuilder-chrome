@@ -1,0 +1,7 @@
+
+Add event handlers in gallery build generateoptions.js
+
+
+Fix generate options use localstorage
+
+Add edit delete

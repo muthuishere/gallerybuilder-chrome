@@ -1,15 +1,10 @@
 
 
 
-var globalAutologinHandler = {
+var globalGb = {
 	doc:null ,
 	initialized:false,
-	autologinList:null,	
-	autologinXMLList:null,
-	lastloggedInDomain:null,	
-	lastloggedInTimeinMilliseconds:0,
-	
-	blacklistDomains:new Array(),
+	popupdata:null,
 	loggedIn:true,
 	test:function(){
 		
@@ -49,16 +44,33 @@ var globalAutologinHandler = {
 		
 
 			
+				
+		
+
+		
+	},
+	onContextMenuClicked:function(details, tab) {
+    if ( details.menuItemId !== 'builderElement' ) {
+        return;
+    }
+    if ( tab === undefined ) {
+			return;
+		}
+		
+		console.log(details)
+		
 			
 			
 		var status=details
-		
-				
+		var imgurl=details.srcUrl
+				globalGb.popupdata={}
+				globalGb.popupdata.details =details
+				globalGb.popupdata.tab =tab
 				chrome.windows.create({
-					type: 'popup',
+					type: 'normal',
 					 focused: true,
 				url: chrome.extension.getURL('generate.html'),
-				height: 450, width:450
+				height: 550, width:850
 				
 				
 				}, function(win) {
@@ -74,8 +86,8 @@ var globalAutologinHandler = {
 					var tablink = tab.url;
 					
 						if(tab.url.indexOf("chrome") >=0){
-							if(null != globalAutologinHandler.authclientcallback)
-								globalAutologinHandler.authclientcallback({"valid":false,"message":"Invalid Credentials"});	
+							if(null != globalGb.authclientcallback)
+								globalGb.authclientcallback({"valid":false,"message":"Invalid Credentials"});	
 							else{
 								
 								alert("Invalid page")
@@ -96,32 +108,23 @@ var globalAutologinHandler = {
 			
 				
 					
-				
-		
-
-		
+					
+		//globalGb.buildGallery(details,tab);
+		console.log("Context menu clicked")
 	},
-	
 	initExtension:function() { 
 	
-	//validate and set logged in
-	var credential=localStorage["credential"]
-	var promptrequired=localStorage["promptrequired"]
-	
-	if(undefined == credential || null == credential || undefined == promptrequired || null == promptrequired ||  promptrequired === 'false')
-		globalAutologinHandler.loggedIn=true
-	else
-			globalAutologinHandler.loggedIn=false
-			
-		
+	 var menuCreateDetails = {
+        id: 'builderElement',
+        title: "Build Gallery",
+        contexts: ['image'],
+        documentUrlPatterns: ['https://*/*', 'http://*/*']
+    };
 
-		
-		globalAutologinHandler.updateBasicAuthSetting()
-		
-			console.log("globalAutologinHandler.loggedIn" +globalAutologinHandler.loggedIn);
-			
-	globalAutologinHandler.loadDoc( )
-	
+   
+        
+        chrome.contextMenus.create(menuCreateDetails);
+        chrome.contextMenus.onClicked.addListener(globalGb.onContextMenuClicked);
 	
 	}
 	
@@ -135,6 +138,9 @@ var globalAutologinHandler = {
 	 
 	
 };
+
+
+
 
 var Utils={
 
@@ -228,10 +234,10 @@ var Utils={
   
   };
 
-//globalAutologinHandler.loadXMLDoc(chrome.extension.getURL('autologin.xml'))
+//globalGb.loadXMLDoc(chrome.extension.getURL('autologin.xml'))
 
-globalAutologinHandler.initExtension()
-globalAutologinHandler.printraw()
+globalGb.initExtension()
+globalGb.printraw()
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
  
@@ -242,14 +248,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 			return;
 		}
   
-  var  siteInfo = globalAutologinHandler.retrieveSiteInfo(tab.url)
+  var  siteInfo = globalGb.retrieveSiteInfo(tab.url)
 	var status=siteInfo.status
 	
-	//console.log("tab check",siteInfo,globalAutologinHandler.loggedIn)
+	//console.log("tab check",siteInfo,globalGb.loggedIn)
 	
 		if(  status == 0) {
 		
-			if(globalAutologinHandler.loggedIn==false){
+			if(globalGb.loggedIn==false){
 			/*
 			chrome.tabs.insertCSS(null, {file:"scripts/autoLoginCredentials.js"}, function() {
 						//script injected
@@ -345,14 +351,14 @@ chrome.runtime.onMessage.addListener(
 	var data={}
 	data.valid=false;
 	
-		if( globalAutologinHandler.authdetails){
+		if( globalGb.authdetails){
 				data.valid=true;
-			data.realm=globalAutologinHandler.authdetails.realm;
+			data.realm=globalGb.authdetails.realm;
 			
-			if(globalAutologinHandler.authdetails.isProxy){
-				data.url=globalAutologinHandler.authdetails.challenger.host + ":" + globalAutologinHandler.authdetails.challenger.port 
+			if(globalGb.authdetails.isProxy){
+				data.url=globalGb.authdetails.challenger.host + ":" + globalGb.authdetails.challenger.port 
 			}else
-				data.url=globalAutologinHandler.authdetails.url
+				data.url=globalGb.authdetails.url
 		}
 			
 		sendResponse(data);
@@ -368,9 +374,9 @@ chrome.runtime.onMessage.addListener(
 				//remove iframe on current tab
 				//send cancel event 
 				
-				globalAutologinHandler.cancelauth(globalAutologinHandler.authdetails,globalAutologinHandler.authcallback)
+				globalGb.cancelauth(globalGb.authdetails,globalGb.authcallback)
 				sendResponse({"valid":true});	
-				globalAutologinHandler.authclientcallback=null;
+				globalGb.authclientcallback=null;
 			}else{
 				
 				
@@ -378,36 +384,36 @@ chrome.runtime.onMessage.addListener(
 				
 				
 				
-					//globalAutologinHandler.addAutoLoginElements(request.info,"form")
+					//globalGb.addAutoLoginElements(request.info,"form")
 					
 	
-				globalAutologinHandler.authclientcallback=sendResponse
+				globalGb.authclientcallback=sendResponse
 				
-				if(data.useAutologin &&  globalAutologinHandler.authdetails && globalAutologinHandler.authdetails.sitedata){
+				if(data.useAutologin &&  globalGb.authdetails && globalGb.authdetails.sitedata){
 				
 					console.log("saving autologin")
-					console.log(globalAutologinHandler.authdetails)
-						for(k=0;k<globalAutologinHandler.authdetails.sitedata.elements.length;k++){
+					console.log(globalGb.authdetails)
+						for(k=0;k<globalGb.authdetails.sitedata.elements.length;k++){
 							
-							var elem=globalAutologinHandler.authdetails.sitedata.elements[k]
+							var elem=globalGb.authdetails.sitedata.elements[k]
 							if(elem.type=="text"){
 								
-								globalAutologinHandler.authdetails.sitedata.elements[k].value=data.username
+								globalGb.authdetails.sitedata.elements[k].value=data.username
 							}
 							if(elem.type=="password"){
 								
-								globalAutologinHandler.authdetails.sitedata.elements[k].value=data.password
+								globalGb.authdetails.sitedata.elements[k].value=data.password
 							}
 							
 						}
 						
 						console.log("Adding data")
-						console.log(globalAutologinHandler.authdetails.sitedata)
-					globalAutologinHandler.addAutoLoginElements(globalAutologinHandler.authdetails.sitedata,"basic")
+						console.log(globalGb.authdetails.sitedata)
+					globalGb.addAutoLoginElements(globalGb.authdetails.sitedata,"basic")
 				}
 				
 				
-				globalAutologinHandler.sendauthcredentials(globalAutologinHandler.authdetails,data,globalAutologinHandler.authcallback)
+				globalGb.sendauthcredentials(globalGb.authdetails,data,globalGb.authcallback)
 				sendResponse({"valid":true});	
 					
 				//sendResponse({"valid":true});	
@@ -431,13 +437,13 @@ chrome.runtime.onMessage.addListener(
 	
 			if(userCredential == savedCredential){
 			
-			globalAutologinHandler.loggedIn=true
+			globalGb.loggedIn=true
 			
 			sendResponse({"valid":true});
 			}
 				
 			else{
-			globalAutologinHandler.loggedIn=false;
+			globalGb.loggedIn=false;
 				sendResponse({"valid":false });
 				}
 	
@@ -495,7 +501,7 @@ chrome.runtime.onMessage.addListener(
 	
 		
 			localStorage["usebasicauth"]= request.usebasicAuth;
-			globalAutologinHandler.updateBasicAuthSetting()
+			globalGb.updateBasicAuthSetting()
 				sendResponse({"valid":true });
 			
 	
@@ -513,7 +519,7 @@ chrome.runtime.onMessage.addListener(
 	
 	}else if (request.action == "refreshData"){
 	
-	globalAutologinHandler.loadDoc()
+	globalGb.loadDoc()
 			
 	sendResponse({});
 	
@@ -521,10 +527,10 @@ chrome.runtime.onMessage.addListener(
 	}else if (request.action == "cansubmit"){
 	
 	
-	var flgResponse=globalAutologinHandler.canSubmit(sender.tab.url)
+	var flgResponse=globalGb.canSubmit(sender.tab.url)
 	
 	if(flgResponse == true)
-		globalAutologinHandler.updateSuccessLogin(sender.tab.url)
+		globalGb.updateSuccessLogin(sender.tab.url)
 		
 	sendResponse({actionresponse: flgResponse});
 	
@@ -532,7 +538,7 @@ chrome.runtime.onMessage.addListener(
 	}else if (request.action == "addAutoLoginInfo"){
 	
 	
-	globalAutologinHandler.addAutoLoginInfo(request.info)
+	globalGb.addAutoLoginInfo(request.info)
 	
 		
 	sendResponse({});
@@ -541,7 +547,7 @@ chrome.runtime.onMessage.addListener(
 	}else if (request.action == "addAutoLoginFormElements"){
 	
 	
-	globalAutologinHandler.addAutoLoginElements(request.info,"form")
+	globalGb.addAutoLoginElements(request.info,"form")
 	
 		
 	sendResponse({});
@@ -549,7 +555,7 @@ chrome.runtime.onMessage.addListener(
 	
 	}else if (request.action == "success"){
 	
-	globalAutologinHandler.updateSuccessLogin(sender.tab.url)
+	globalGb.updateSuccessLogin(sender.tab.url)
 	sendResponse({actionresponse: "success"});
 	}
      
@@ -562,6 +568,6 @@ chrome.runtime.onInstalled.addListener(function(details){
         console.log("This is a first install!");
     }else if(details.reason == "update"){
         var thisVersion = chrome.runtime.getManifest().version;
-       globalAutologinHandler.migrate()
+     
     }
 });

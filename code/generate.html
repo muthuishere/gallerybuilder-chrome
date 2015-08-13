@@ -6,13 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/bootcustom.css">
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/bootstrap.min.js"></script>
+ <script src="scripts/jquery.min.js"></script>
+ <script src="scripts/mustache.min.js"></script>    
+  <script src="scripts/bootstrap.min.js"></script> 
+  
+  
 </head>
-<body>
+<body >
 
 <div class="container">
-  <h2>Gallery Builder</h2>
+  
+  <h2 style="margin-bottom:30px"><img src="images/gallerybuilder-38.png"/>Gallery Builder</h2>
+
+
 
    
   <ul class="nav nav-tabs">
@@ -22,13 +28,19 @@
 
   <div class="tab-content">
     <div id="home" class="tab-pane fade in active">
-      <h3>Build</h3>
+      
       <p>
 	  
 	   <div class="form-group">
-    
+    <h4>Thumbnail URL</h4>
     <input class="form-control input-lg" id="inputlg" placeholder="Enter URL parameters marked with $1,$2...."  type="text">
   </div>
+  
+  <div class="form-group">
+    <h4>Content URL</h4>
+    <input class="form-control input-lg" id="inputlg" placeholder="Enter URL parameters marked with $1,$2...."  type="text">
+  </div>
+  
   
 
 	  <div id="tbl" >
@@ -76,88 +88,109 @@
       <p>
 	
 	<!-- Modal dialog -->
-	<div class="modal fade" id="modalAddMethod" tabindex="-1" role="dialog" aria-labelledby="modalAddMethod" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
-            <h4 class="modal-title" id="myModalLabel">Add Custom function</h4>
-            </div>
-            <div class="modal-body">
-                
-				  <div class="form-group">
-    
-				<input class="form-control input-sm" id="methodname" placeholder="Enter Method Name"  type="text">
-			  </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-    </div>
-  </div>
-</div>
-
-    <div class="pull-right">
+	
+    <div   class="pull-right">
 				  <div id="addscript" class="btn-group btn-container-right">
-				    <button id="btnadd" type="button" class="btn btn-info">
+				 
+				    <button id="btnadd" type="button" class="btn btn-info" data-toggle="modal" data-target="#modalAddMethod" >
 					  <span class="glyphicon glyphicon-plus"></span> Add
 					</button>
 					
 				</div>
 				</div>
-				
-				<div style="clear:both;"/>
-				
-				<br/>
+	<div style="clear:both;"/>
+	<br/>
 	
-	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
-		  <div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingOne">
-			  <h4 class="panel-title">
-				<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#getweek" aria-expanded="false" aria-controls="collapseOne">
-				  GetWeek
-				</a>
-			  </h4>
-			</div>
-			<div id="getweek" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-			  <div class="panel-body">
-					  <div class="form-group">
-				  
-					<textarea class="form-control" rows="8">
-//index is the argument
 
-	var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-	
-return 	days[index]
+  	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
+   
+    </div>
+       
+	   
+	   
+	   <script id="accordTemplate" type="x-tmpl-mustache" >
+
+	       <div class="panel panel-default" id="heading{{panelId}}">
+        <div class="panel-heading accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" data-target="#{{panelBaseId}}-{{index}}">
+             <h4 class="panel-title">{{title}}</h4>
+
+			 
+			 
+        </div>
+        <div id="{{panelBaseId}}-{{index}}" data-index="{{index}}" class="panel-collapse collapse">
+            <div class="panel-body" id="panelbody{{panelId}}">
+			
+			
 					
-					</textarea>
-				  </div>
-				    <div class="pull-right">
-				  <div id="editscript1" class="btn-group btn-container-right">
-				    <button id="btnedit1" type="button" class="btn btn-info">
-					  <span class="glyphicon glyphicon-pencil"></span> Edit
-					</button>
-				</div>
-				
-				
-				  <div id="updatescript1" class="btn-group btn-container-right">
-				    <button id="btnsave1" type="button" class="btn btn-info">
-					  <span class="glyphicon glyphicon-ok-sign"></span> Save
-					</button>
-					 <button style="margin-left:10px" id="btncancel1" type="button" class="btn btn-info">
-					  <span class="glyphicon glyphicon-remove-sign"></span> Cancel
-					</button>
-				</div>
-				</div>
+							<div class=form-group">
+								<textarea id="editscript{{index}}" disabled="disabled" class="form-control" rows="8">{{script}}</textarea>
+							</div>
+							<br/>
+							<div class="pull-right">
+								<div id="editcontainer{{index}}" class="btn-group btn-container-right" >
+									<button id="btnedit{{index}}" type="button" class="btn btn-info">
+										<span class="glyphicon glyphicon-pencil"/> Edit
+									</button>
+								</div>
+								<div id="updatecontainer{{index}}" class="btn-group btn-container-right" style="display:none">
+									<button id="btnupdate{{index}}" type="button" class="btn btn-info">
+										<span class="glyphicon glyphicon-ok-sign"/> Save
+									</button>
+									<button style="margin-left:10px" id="btncancel{{index}}" type="button" class="btn btn-info">
+										<span class="glyphicon glyphicon-remove-sign"/> Cancel
+									</button>
+								</div>
 
-				  
-			  </div>
+
+							</div>
+				
+				
+				
 			</div>
-		  </div>
-		</div>
+        </div>
+    </div>
+	
 
-	  
+	
+			
+
+    </script>
+	
+   
+	 
+	
+	<div id="modalAddMethod" class="modal fade" role="dialog">
+	
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            
+			 <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Add Custom function</h4>
+            </div>
+            <div class="modal-body">
+                
+				  <div class="form-group" id="methodgroup">
+    
+				<input class="form-control input-sm" id="methodname" placeholder="Enter Method Name" value="square" data-toggle="tooltip" data-placement="right" title="" type="text"><span id="spanerror" style="color:red;font-weight:bold"  /> 
+			  </div>
+			  
+				  <div class="form-group">
+    
+				<textarea id="txtareaadd" class="form-control" rows="8"></textarea>
+			  </div>
+			  
+			  
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btncanceladd" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btnsavechanges" class="btn btn-primary">Save changes</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+
 	  
 	  </p>
     </div>
@@ -165,5 +198,8 @@ return 	days[index]
   </div>
 </div>
 
+  <script src="scripts/generateoptions.js"></script>
+ 
+  
 </body>
 </html>
