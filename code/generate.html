@@ -16,14 +16,14 @@
 
 <div class="container">
   
-  <h2 style="margin-bottom:30px"><img src="images/gallerybuilder-38.png"/>Gallery Builder</h2>
+  <h2 style="margin-bottom:30px"><img src="images/gallery-builder-38.png"/>Gallery Builder</h2>
 
 
 
    
   <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#home">Build</a></li>
-    <li><a data-toggle="tab" href="#customfunctions">Custom Functions</a></li>    
+    <li style="visibility:hidden"><a data-toggle="tab" href="#customfunctions">Custom Functions</a></li>    
   </ul>
 
   <div class="tab-content">
@@ -33,18 +33,35 @@
 	  
 	   <div class="form-group">
     <h4>Thumbnail URL</h4>
-    <input class="form-control input-lg" id="inputlg" placeholder="Enter URL parameters marked with $1,$2...."  type="text">
+    <input class="form-control input-lg" id="inputthumblg" placeholder="Enter URL parameters marked with [0-9;1],[a-z]...."  type="text">
   </div>
   
   <div class="form-group">
     <h4>Content URL</h4>
-    <input class="form-control input-lg" id="inputlg" placeholder="Enter URL parameters marked with $1,$2...."  type="text">
+    <input class="form-control input-lg" id="inputcontentlg" placeholder="Enter URL parameters marked with [0-9;1],[a-z]...."  type="text">
   </div>
   
   
 
 	  <div id="tbl" >
-		  <div id="" class="input-group">
+	  
+	  
+	  <div  class="pre-scrollable" style="height:400px;overflow-x:hidden;">
+		<div class="row">
+			<div class="col-md-6 ">ThumbURL</div>
+			
+			<div class="col-md-6">ContentURL</div>
+		</div>
+		
+	</div>
+		<div  class="pre-scrollable" style="height:400px;overflow-x:hidden;">
+		<div class="row">
+			<div class="col-md-12">Image here </div>
+			</div>
+		
+	</div>
+	
+		  <div id="" style="display:none" class="input-group">
 		  <div class="col-xs-1">
 		  Param $1
 		  </div>

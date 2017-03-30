@@ -1,30 +1,26 @@
 {
-  
-  "manifest_version": 2,
-  "name": "Gallery Builder",
-  "short_name": "Gallery Builder",
-  "version": "1.0.0",
+   "author": "Muthukumaran Navaneethakrishnan(https://github.com/muthuishere)",
+   "background": {
+      "scripts": [  "scripts/global.js" ]
+   },
+   "description": "Gallery Builder chrome",
+   "icons": {
+      "128": "images/gallery-builder-128.png",
+      "48": "images/gallery-builder-48.png",
+      "64": "images/gallery-builder-64.png"
+   },
+   
+   "page_action" :
+	  {
+	    "default_icon" : "images/gallery-builder-19.png",
+	    "default_title" : "Build Gallery"
+	  },
 
-
-  "description": "Automatically login to your favourite websites without entering credentials ",
-  "icons": {  
-   "48" : "images/gallerybuilder-48.png",
-   "64" : "images/gallerybuilder-64.png",
-    "128" : "images/gallerybuilder-128.png"
-	},
-
-
-  "author": "Muthukumaran Navaneethakrishnan(https://github.com/muthuishere)",
- "background": { "scripts": ["scripts/Helper.js","global.js"] },
- 
-  
- "web_accessible_resources": [
-    "images/*.png",  
-	"images/*.jpg", 
-	"css/*.css",
-	"auth.html",
-	"scripts/*.js"
-  ], 
-  "permissions": ["tabs", "contextMenus",  "http://*/*", "https://*/*"]
-  
+   "manifest_version": 2,
+   "name": "Build Gallery of Images",
+   "options_page": "faq/index.html",  
+   "permissions": [ "tabs","declarativeContent","notifications", "https://*/*" ],
+   "short_name": "gallery-builder",   
+   "version": "1.2.0",
+   "web_accessible_resources": [ "images/*.png","images/*.svg","faq/images/*.png"]
 }
