@@ -23,3 +23,6 @@
 .panel-heading:hover h4 {
     text-decoration: underline;
 }
+.lstpreview{
+    overflow-x: hidden;
+}

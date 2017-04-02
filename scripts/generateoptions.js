@@ -16,6 +16,17 @@ if (undefined == builder) {
 		decimalCount:function(num) {
   					return (num.split('.')[1] || []).length;
 		},
+		getParameterByName:function (name, url) {
+			if (!url) {
+			url = window.location.href;
+			}
+			name = name.replace(/[\[\]]/g, "\\$&");
+			var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+				results = regex.exec(url);
+			if (!results) return null;
+			if (!results[2]) return '';
+			return decodeURIComponent(results[2].replace(/\+/g, " "));
+		},
 		padNumber:function(str,count){
 
 			var result=str;
@@ -354,11 +365,23 @@ if (undefined == builder) {
 			});
 
 
+			}else{
+
+				var imgUrls=[];
+				imgUrls.push(value);
+				builder.fillimageUrls(imgUrls,opType);
 			}
-			console.log(pairs)
 			
 			
 			
+			
+		},
+		getContentImageUrl:function(index,imgUrl){
+			
+			if(builder.contentImgUrls.length < index && undefined != builder.contentImgUrls[index])
+				return '<a href="'+ builder.contentImgUrls[index]+'" target="_blank">' + imgUrl + '</a>'
+
+			return imgUrl	
 		},
 		fillimageUrls:function(imgUrls,operationType){
 
@@ -367,8 +390,18 @@ if (undefined == builder) {
 			var className=".lstThumbnails"
 			if(operationType == "CONTENT"){
 				className=".lstContentImages"
-			
+				builder.contentImgUrls=imgUrls
+			}else{
+
+				builder.thumbImgUrls=imgUrls
 			}
+
+	
+
+
+	
+
+
 
 			document.querySelector(className).innerHTML="";
 
@@ -382,7 +415,7 @@ if (undefined == builder) {
 		
 			$(".lstpreview").click(function(event) {
 				
-				console.log(event.target.innerHTML)
+				
 				$(".imgpreview").attr("src",event.target.innerHTML)
 				return false;
 				});
@@ -393,8 +426,41 @@ if (undefined == builder) {
 	
 		init : function () {
 
+			var openGallery=Helper.getParameterByName("openGallery") ;
+			if(openGallery != null && openGallery != "" && openGallery == "true"){
+					
+					
+					var request={}
+					request.action="galleryData"
+
+					
+					
+						chrome.runtime.sendMessage(request, function(response) {
+  													
+													 document.body.innerHTML=response.galleryHTML;
+												});
+												
+					
+					return;
+
+			}
+			
 	
+			var imgUrl=Helper.getParameterByName("id") ;
+			if(imgUrl != null && imgUrl != ""){
+					
+					$( "#inputthumblg" ).val(imgUrl)
+
+			}
 				
+				var referrerurl=Helper.getParameterByName("referrerurl") ;
+			if(referrerurl != null && referrerurl != ""){
+					
+					$( "#referrer" ).val(referrerurl)
+
+			}
+
+
 			$( "#inputthumblg" ).change(function() {
 				
 				//Find Number of []
@@ -409,6 +475,53 @@ if (undefined == builder) {
 				builder.parseImgData(this.value,"CONTENT")
 				
 		});
+
+			$( ".btnbuild" ).click(function() {
+				
+					//Get array of thumbnails & content lstContentImages
+
+					//if its available send to back ground 
+
+					var request={}
+					request.action="build"
+
+					request.referrer= $("#referrer").val() 
+					
+
+				
+					
+					var galleryHTML=""
+
+					for(var t=0;t<builder.thumbImgUrls.length;t++){
+
+						
+
+						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
+						
+					}
+
+					if(request.referrer == ""){
+						document.body.innerHTML=galleryHTML;
+						return;
+						}
+
+
+					request.galleryHTML=galleryHTML
+
+
+
+					chrome.runtime.sendMessage(request, function(response) {
+  													console.log(response);
+													//  window.close();
+												});
+
+				
+		});
+
+		
+
+			builder.parseImgData($( "#inputthumblg" ).val(),"THUMB")
+
 
 		}
 	}
