@@ -167,13 +167,13 @@ chrome.runtime.onInstalled.addListener(function(details){
 	
     if((details.reason == "install"  || details.reason == "update" ) ){
       
-	   /*
+	
 		
 		chrome.tabs.create({"url":chrome.extension.getURL("faq/index.html") ,"selected":true},function(tab){
     
     });
 	
-	*/
+	
     }
 });
 

@@ -3,7 +3,7 @@
    "background": {
       "scripts": [  "scripts/global.js" ]
    },
-   "description": "Generate Gallery of images from numbers alphabets.. and see it in a single page .",
+   "description": "Generate gallery from single image to  list of images (if image just has numeric increment or alphabet increment)",
    "icons": {
       "128": "images/gallery-builder-128.png",
       "48": "images/gallery-builder-48.png",

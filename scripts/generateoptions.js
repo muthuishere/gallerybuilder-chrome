@@ -192,7 +192,7 @@ if (undefined == builder) {
 					var nextVal=start;
 					var urltemplate=""
 
-						console.log("templates" + templates.length + "total "+ total)	
+						//console.log("templates" + templates.length + "total "+ total)	
 
 					for(k=0;k<templates.length;k++){
 						urltemplate=templates[k]
@@ -206,7 +206,7 @@ if (undefined == builder) {
 							responses.push(changedTemplate);
 							var oldVal=nextVal
 							nextVal=Helper.nextValue(nextVal,incrementBy);
-							console.log("oldVal" + oldVal + "nextVal "+ nextVal + " for scriptstring" +  scriptstring + "changedTemplate" + changedTemplate)	
+							//console.log("oldVal" + oldVal + "nextVal "+ nextVal + " for scriptstring" +  scriptstring + "changedTemplate" + changedTemplate)	
 							
 
 
@@ -226,7 +226,7 @@ if (undefined == builder) {
 								callback({"status":0,"msg":data})
 								return 
 					}else{
-						console.log("going further with data",data)
+						//console.log("going further with data",data)
 						builder.generateScript(data,callback);
 						return;
 					}
@@ -270,7 +270,7 @@ if (undefined == builder) {
 			
 			//Now we have url template 
 			
-			console.log("urltemplate" + urlTemplate)
+			//console.log("urltemplate" + urlTemplate)
 
 			//recursive generate 
 			return urlTemplate;
@@ -280,7 +280,7 @@ if (undefined == builder) {
 			
 		},
 		parseImgData:function(value,opType){
-			console.log(value)
+			//console.log(value)
 			
 			var curentOperations=[];
 			
@@ -317,7 +317,7 @@ if (undefined == builder) {
 					
 					currentstr=currentstr.substr(lastPairIndex)
 					
-					console.log("beforestring" + beforestring +" pair "+  pairs[i] + " lastPairIndex" + lastPairIndex + "currentstr " + currentstr)
+					//console.log("beforestring" + beforestring +" pair "+  pairs[i] + " lastPairIndex" + lastPairIndex + "currentstr " + currentstr)
 
 					lastPairIndex=0;
 					//get string before pair after last pair index
@@ -352,7 +352,7 @@ if (undefined == builder) {
 			
 			builder.generateScript(data,function(response){
 
-				console.log("On complete",opType)
+				//console.log("On complete",opType)
 
 				var imgUrls=[];
 				imgUrls.push(urltemplate);
@@ -511,8 +511,8 @@ if (undefined == builder) {
 
 
 					chrome.runtime.sendMessage(request, function(response) {
-  													console.log(response);
-													//  window.close();
+  													//////console.log(response);
+													  window.close();
 												});
 
 				
