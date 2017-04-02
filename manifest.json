@@ -3,7 +3,7 @@
    "background": {
       "scripts": [  "scripts/global.js" ]
    },
-   "description": "Gallery Builder",
+   "description": "Generate Gallery of images from numbers alphabets.. and see it in a single page .",
    "icons": {
       "128": "images/gallery-builder-128.png",
       "48": "images/gallery-builder-48.png",
@@ -21,6 +21,6 @@
    "options_page": "faq/index.html",  
    "permissions": [ "tabs","contextMenus","declarativeContent","notifications", "http://*/*", "https://*/*" ],
    "short_name": "gallery-builder",   
-   "version": "1.2.0",
+   "version": "1.0.0",
    "web_accessible_resources": [ "images/*.png","images/*.svg","faq/images/*.png"]
 }
