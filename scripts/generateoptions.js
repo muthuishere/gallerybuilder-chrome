@@ -111,6 +111,19 @@ if (undefined == builder) {
 		
 		thumbImgUrls:[],
 		contentImgUrls:[],
+		findPicasaData(){
+			
+				//Settimeout for 3 seconds and call init data 
+				chrome.runtime.sendMessage({"action":"lastpicasadata"}, function(response) {
+  													
+													$("#inputpicasauserid").val(response.user) 
+													$("#inputpicasaalbumid").val(response.album) 
+												$("#inputpicasaauthid").val(response.auth) 
+													
+					});
+					
+			
+		},
 		generateScript(data,callback){
 
 			//Get the pair
@@ -383,6 +396,8 @@ if (undefined == builder) {
 
 			return imgUrl	
 		},
+		
+		
 		fillimageUrls:function(imgUrls,operationType){
 
 
@@ -423,9 +438,26 @@ if (undefined == builder) {
 
 		},
 		
+		switchpicasabuildbuttons(flgshowbuild){
+			
+			if(flgshowbuild){
+				$( ".btnpicasafetch" ).css("display","none")
+				$( ".btnpicasabuild" ).css("display","")
+				
+			}else{
+				
+				$( ".btnpicasafetch" ).css("display","")
+				$( ".btnpicasabuild" ).css("display","none")
+			}
+				
+		},
 	
 		init : function () {
 
+			
+					
+					
+					
 			var openGallery=Helper.getParameterByName("openGallery") ;
 			if(openGallery != null && openGallery != "" && openGallery == "true"){
 					
@@ -449,10 +481,19 @@ if (undefined == builder) {
 			var imgUrl=Helper.getParameterByName("id") ;
 			if(imgUrl != null && imgUrl != ""){
 					
+					
+		
+		
+					
 					$( "#inputthumblg" ).val(imgUrl)
 
+			}else{
+				
+				imgUrl="";
 			}
 				
+				
+		
 				var referrerurl=Helper.getParameterByName("referrerurl") ;
 			if(referrerurl != null && referrerurl != ""){
 					
@@ -476,6 +517,111 @@ if (undefined == builder) {
 				
 		});
 
+		
+		
+		
+		
+		
+		
+				$( ".btnpicasafetch" ).click(function() {
+					
+					
+					
+					if($("#inputpicasauserid").val() == "" || $("#inputpicasaalbumid").val() == "" ){
+						
+						alert("User and album cannot be empty")
+						return;
+					}
+					
+					var request={};
+					
+					request.action="fetchpicasa"
+					request.user=$("#inputpicasauserid").val() ;
+					request.album=$("#inputpicasaalbumid").val(); 
+					request.auth=$("#inputpicasaauthid").val() ;
+					
+					
+					
+							chrome.runtime.sendMessage(request, function(response) {
+  													console.log("fetching picasa response")
+													console.log("fetch response",response)
+													if(response.status != 0 ){
+														
+														alert("Error retrieving picasa album" + response.msg);
+														return;
+													}
+													//
+													
+													
+													
+													
+													if($("#useboth").val()  == "TRUE"){
+														
+															builder.fillimageUrls(response.thumbimgurls,"THUMB")
+															builder.fillimageUrls(response.contentimgurls,"CONTENT")	
+														
+													}else{
+														
+														builder.fillimageUrls(response.contentimgurls,"THUMB")
+														
+															
+													}
+													builder.switchpicasabuildbuttons(true);
+													
+												});
+												
+										
+												
+												
+					
+				});
+				
+				
+						
+			$( ".btnpicasabuild" ).click(function() {
+				
+					//Get array of thumbnails & content lstContentImages
+
+					//if its available send to back ground 
+
+					var request={}
+					request.action="build"
+
+					request.referrer= "about:blank"
+					
+
+				
+					
+					var galleryHTML=""
+
+					for(var t=0;t<builder.thumbImgUrls.length;t++){
+
+						
+
+						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
+						
+					}
+
+					if(request.referrer == ""){
+						document.body.innerHTML=galleryHTML;
+						return;
+						}
+
+
+					request.galleryHTML=galleryHTML
+
+
+
+					chrome.runtime.sendMessage(request, function(response) {
+  													//////console.log(response);
+													  window.close();
+												});
+
+				
+		});
+		
+		
+				
 			$( ".btnbuild" ).click(function() {
 				
 					//Get array of thumbnails & content lstContentImages
@@ -519,10 +665,22 @@ if (undefined == builder) {
 		});
 
 		
+		builder.switchpicasabuildbuttons(false)
+		
+		
 
 			builder.parseImgData($( "#inputthumblg" ).val(),"THUMB")
 
 
+		if(imgUrl.indexOf(".googleusercontent.com") > 0){
+					$('.nav-tabs a[href="#picasa"]').tab('show')
+					
+					
+					
+					
+					setTimeout(function(){ builder.findPicasaData(); }, 3000);
+			}
+		
 		}
 	}
 	//builder.test();

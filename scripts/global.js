@@ -33,11 +33,14 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 chrome.contextMenus.create({
     "title": "Build Gallery",
     "contexts": [ "image"],
-    "onclick" : function(e){
+    "onclick" : function(e,curtab){
 
 		console.log(e);
+		console.log(curtab);
 		if (e.mediaType === "image") {
 
+				//if image data is picasa wait for creati
+				global.findpicasaData(e.srcUrl,curtab)
 			console.log(e.pageUrl);
        		 showGenerateGallery(encodeURI(e.srcUrl),encodeURI(e.pageUrl));
     }
@@ -46,10 +49,108 @@ chrome.contextMenus.create({
   });
 
 
+  	function tosingleline(f) {
+	  return f.toString().
+		  replace(/^[^\/]+\/\*!?/, '').
+		  replace(/\*\/[^\/]+$/, '');
+	}
+
+	
 var global=
 {
 
 	lastGalleryData:{},
+	lastPicasaData:{
+		user:"110869310839069006742",
+		album:"6411340037031931505",
+		auth:"Gv1sRgCLfnmeqay9PJKg"
+		
+	},
+	findpicasaData:function(imgUrl,tab){
+		
+		
+		if(imgUrl.indexOf(".googleusercontent.com") < 0){
+			return;
+		}
+			var code = tosingleline(function() {/*!
+	
+						
+						var credentials={}
+			function stripforAfter(txt,htmlcontent){
+				
+						var content=htmlcontent
+						content=content.split(txt)[1]
+						content=content.split(",")[0]
+						
+						content=content.replace(/[^a-zA-Z0-9&=]/g, "")
+						return content
+						
+						
+			}
+			for(var i=0;i<document.querySelectorAll("script").length;i++){
+				var curscript=document.querySelectorAll("script")[i];
+				if(curscript.hasAttribute("src") == false && curscript.innerHTML.indexOf("userID") > 0  && curscript.innerHTML.indexOf("album") > 0 ){
+					
+					
+					
+					
+						
+						
+						credentials.user=stripforAfter("userID",curscript.innerHTML)
+						
+						credentials.album=stripforAfter("album",curscript.innerHTML)
+						credentials.auth=""
+						
+						if(credentials.album.indexOf("&") > 0 && credentials.album.indexOf("authkey") > 0 && credentials.album.indexOf("=") > 0){
+								var buffer=credentials.album.split("&")
+								credentials.album=buffer[0]
+								credentials.auth=buffer[1].split("=")[1]
+							
+							}
+						
+						
+						
+							
+					
+				}
+			}
+		 ({
+              credentials: credentials || ""
+           });*/});
+
+
+
+		   
+	
+			
+	
+			chrome.tabs.executeScript(tab.id,{
+				code: code
+			}, function(results) {
+				
+				if(results && results.length >0){
+					
+					
+					
+					
+					global.lastPicasaData.user=results[0].credentials.user,
+							global.lastPicasaData.album=results[0].credentials.album
+							global.lastPicasaData.auth=results[0].credentials.auth
+		
+		
+		
+				}
+				
+						console.log(results)
+					
+				});
+		
+	}
+
+
+
+
+
 
 }
 
@@ -107,30 +208,140 @@ function openTab(data){
 }
 
 
+
+	var xmlDoc;
+	
+	function ajaxreq(url,callback){
+		
+		
+		var imageResponse={}
+		imageResponse.thumbimgurls=[]
+		imageResponse.contentimgurls=[]
+		imageResponse.error=""
+		
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.setRequestHeader('Content-Type', 'text/xml');
+		xhr.onreadystatechange = function() {
+		  if (xhr.readyState == 4) {
+			  
+			  if (xhr.status === 200) {
+					
+					xmlDoc = xhr.responseXML;
+						
+						for(var k=0;k<xmlDoc.getElementsByTagName("entry").length;k++){
+							
+							var entry=xmlDoc.getElementsByTagName("entry")[k];
+								var img={};
+								imageResponse.contentimgurls.push(entry.getElementsByTagName("content")[0].getAttribute("src"));
+								imageResponse.thumbimgurls.push(entry.getElementsByTagName("thumbnail")[0].getAttribute("url"));
+								
+								
+								
+							
+						}
+		
+			
+			
+				} else {
+					
+					
+					imageResponse.error=xhr.statusText
+					console.log("Error", xhr.statusText)
+				}
+	 
+			  console.log(imageResponse)
+			callback(imageResponse)
+			
+				
+			
+		  }
+		}
+		xhr.send();
+
+	}
+	
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
    
 
+   
+   
+   
+	switch (request.action) {
+  	
+	case 'fetchpicasa':
+			
+			var url="https://picasaweb.google.com/data/feed/api/user/"+request.user+"/albumid/"+ request.album
+			
+			if(request.auth !== ""){
+				url= url  +"?authkey=" + request.auth
+				global.lastPicasaData.auth=request.auth
+			}
+				
+			global.lastPicasaData.user=request.user
+			global.lastPicasaData.album=request.album
+			
+	
+			
+			ajaxreq(url,function(imageResponse){
+				
+				
+				if(imageResponse.contentimgurls.length > 0){
+					console.log("Sending back",sendResponse)
+					
+					sendResponse({"status":0,"contentimgurls":imageResponse.contentimgurls,"thumbimgurls":imageResponse.thumbimgurls});
+					}
+				else
+					sendResponse({"status":-1,"msg":imageResponse.error});
+
+			
+				
+			});
+		return true;
+		
+    break;	
+ 
+
+}
+
+
+//Synchronous
 var response={};
+
+
+
 
 	switch (request.action) {
   case 'build':
     
-	openTab(request)
+	openTab(request);
+	
     break;
 	case 'galleryData':
     
-		response=global.lastGalleryData
+		response=global.lastGalleryData;
+		
     break;
+	case 'lastpicasadata':
+    
+		
+		sendResponse(global.lastPicasaData);
+		break;	
+	
+		
  
   default:
     console.log('Sorry, we are out of ' + request.action + '.');
+	
+	
+	
 }
 
-
+	sendResponse(response);
 
    
-      sendResponse(response);
+      
   });
 
 
@@ -140,7 +351,10 @@ function showGenerateGallery(id,pageurl){
 			pageurl=id;
 
 
- 		chrome.tabs.create({'url': chrome.extension.getURL('generate.html?id='+id + "&referrerurl="+pageurl), 'selected': true});
+		
+		
+		
+			chrome.tabs.create({'url': chrome.extension.getURL('generate.html?id='+id + "&referrerurl="+pageurl), 'selected': true});
 }
 	
 
