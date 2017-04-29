@@ -80,13 +80,18 @@ var global=
 	
 						
 						var credentials={}
+						
+			
 			function stripforAfter(txt,htmlcontent){
 				
 						var content=htmlcontent
 						content=content.split(txt)[1]
 						content=content.split(",")[0]
 						
-						content=content.replace(/[^a-zA-Z0-9&=]/g, "")
+						//content=content.replace(/[^a-zA-Z0-9&=]/g, "")
+						
+						content=content.replace(/'|"|,|:| /g,'');
+						
 						return content
 						
 						
