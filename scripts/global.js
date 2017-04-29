@@ -247,7 +247,16 @@ function openTab(data){
 							
 							var entry=xmlDoc.getElementsByTagName("entry")[k];
 								var img={};
-								imageResponse.contentimgurls.push(entry.getElementsByTagName("content")[0].getAttribute("src"));
+								
+								var contentimg=entry.getElementsByTagName("content")[0].getAttribute("src");//"https://lh3.googleusercontent.com/-BIofpbwoBqQ/WOS3lfGSnlI/AAAAAAAChjU/O7LA5tBTsCk7R9HruJG9CGeyeIg63GukgCHM/page_1.jpg"
+
+								  var arr=contentimg.split("/")
+									arr[arr.length-1]="s3200/"+arr[arr.length-1]
+									
+									contentimg=arr.join("/")
+									
+	
+								imageResponse.contentimgurls.push(contentimg);
 								imageResponse.thumbimgurls.push(entry.getElementsByTagName("thumbnail")[0].getAttribute("url"));
 								
 								
@@ -293,6 +302,7 @@ chrome.runtime.onMessage.addListener(
 				global.lastPicasaData.auth=request.auth
 			}
 				
+				console.log(url)
 			global.lastPicasaData.user=request.user
 			global.lastPicasaData.album=request.album
 			
