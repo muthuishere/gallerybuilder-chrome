@@ -108,6 +108,8 @@ if (undefined == builder) {
 	var builder = {
 
 		methods : [],
+		retrycount:0,
+		MAX_RETRY_COUNT:6,
 		
 		thumbImgUrls:[],
 		contentImgUrls:[],
@@ -118,7 +120,18 @@ if (undefined == builder) {
   													
 													$("#inputpicasauserid").val(response.user) 
 													$("#inputpicasaalbumid").val(response.album) 
-												$("#inputpicasaauthid").val(response.auth) 
+													$("#inputpicasaauthid").val(response.auth) 
+												builder.retrycount+=1;
+												
+												if(response.user == "" && builder.retrycount < builder.MAX_RETRY_COUNT)
+													setTimeout(function(){ builder.findPicasaData(); }, 500);
+												else{
+													
+													//Initiate preview
+												
+													$( ".btnpicasafetch" ).trigger( "click" );
+													
+												}
 													
 					});
 					
@@ -298,6 +311,7 @@ if (undefined == builder) {
 			var curentOperations=[];
 			
 			
+			builder.clearImageUrls(opType);
 			
 			
 			var pairs = value.match(/\[(.*?)\]/g)
@@ -374,6 +388,8 @@ if (undefined == builder) {
 
 
 				}
+				
+				
 				builder.fillimageUrls(imgUrls,opType);
 			});
 
@@ -382,6 +398,7 @@ if (undefined == builder) {
 
 				var imgUrls=[];
 				imgUrls.push(value);
+				
 				builder.fillimageUrls(imgUrls,opType);
 			}
 			
@@ -398,10 +415,23 @@ if (undefined == builder) {
 		},
 		
 		
+		clearImageUrls:function(operationType){
+			
+				var className=".lstThumbnails"
+			if(operationType == "CONTENT"){
+				className=".lstContentImages"
+				
+			}
+			document.querySelector(className).innerHTML="";
+			
+			
+			
+		},
+		
 		fillimageUrls:function(imgUrls,operationType){
 
 
-
+		
 			var className=".lstThumbnails"
 			if(operationType == "CONTENT"){
 				className=".lstContentImages"
@@ -418,7 +448,9 @@ if (undefined == builder) {
 
 
 
-			document.querySelector(className).innerHTML="";
+			//document.querySelector(className).innerHTML="";
+			
+
 
 			for(var t=0;t<imgUrls.length;t++){
 
@@ -501,7 +533,11 @@ if (undefined == builder) {
 
 			}
 
+			
 
+			
+		
+		
 			$( "#inputthumblg" ).change(function() {
 				
 				//Find Number of []
@@ -527,12 +563,20 @@ if (undefined == builder) {
 					
 					
 					
+					
+					
 					if($("#inputpicasauserid").val() == "" || $("#inputpicasaalbumid").val() == "" ){
 						
 						alert("User and album cannot be empty")
 						return;
 					}
 					
+					
+					
+					   var $this = $(this);
+						$this.button('loading');
+
+   
 					var request={};
 					
 					request.action="fetchpicasa"
@@ -542,9 +586,16 @@ if (undefined == builder) {
 					
 					
 					
+					
+														builder.clearImageUrls("THUMB")
+															builder.clearImageUrls("CONTENT")
+															
 							chrome.runtime.sendMessage(request, function(response) {
   													
+													  $this.button('reset');
+													  
 													if(response.status != 0 ){
+														
 														
 														alert("Error retrieving picasa album" + response.msg);
 														return;
@@ -664,6 +715,13 @@ if (undefined == builder) {
 		});
 
 		
+			$( ".input-picasa" ).change(function() {
+				
+				//On change input make fetch button visible
+				builder.switchpicasabuildbuttons(false)
+				
+		});
+		
 		builder.switchpicasabuildbuttons(false)
 		
 		
@@ -675,9 +733,10 @@ if (undefined == builder) {
 					$('.nav-tabs a[href="#picasa"]').tab('show')
 					
 					
+					builder.findPicasaData();
 					
 					
-					setTimeout(function(){ builder.findPicasaData(); }, 3000);
+				
 			}
 		
 		}

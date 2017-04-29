@@ -58,10 +58,16 @@ var global=
 {
 
 	lastGalleryData:{},
-	lastPicasaData:{
+	oldlastPicasaData:{
 		user:"110869310839069006742",
 		album:"6411340037031931505",
 		auth:"Gv1sRgCLfnmeqay9PJKg"
+		
+	},
+	lastPicasaData:{
+		user:"",
+		album:"",
+		auth:""
 		
 	},
 	findpicasaData:function(imgUrl,tab){
@@ -173,8 +179,18 @@ function openTab(data){
 		chrome.tabs.create({'url': data.referrer, 'active': true},function(  tab) {
 
 
-			console.log("created tab" ,tab )
+			//console.log("created tab" ,tab )
 
+			
+			if(tab.url == "about:blank"){
+
+			
+				openInSameTab(tab,data)
+
+				return 
+			}
+			
+			
 			if(tab.url.indexOf("http") != 0){
 
 				shownotification("Error","Invalid Referrer found ");

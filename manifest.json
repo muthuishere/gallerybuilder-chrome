@@ -21,6 +21,6 @@
    "options_page": "faq/index.html",  
    "permissions": [ "tabs","contextMenus","declarativeContent","notifications", "http://*/*", "https://*/*" ],
    "short_name": "gallery-builder",   
-   "version": "1.2.0",
+   "version": "1.3.0",
    "web_accessible_resources": [ "images/*.png","images/*.svg","faq/images/*.png"]
 }
