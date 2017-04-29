@@ -35,13 +35,11 @@ chrome.contextMenus.create({
     "contexts": [ "image"],
     "onclick" : function(e,curtab){
 
-		console.log(e);
-		console.log(curtab);
 		if (e.mediaType === "image") {
 
 				//if image data is picasa wait for creati
 				global.findpicasaData(e.srcUrl,curtab)
-			console.log(e.pageUrl);
+			
        		 showGenerateGallery(encodeURI(e.srcUrl),encodeURI(e.pageUrl));
     }
 
@@ -141,7 +139,7 @@ var global=
 		
 				}
 				
-						console.log(results)
+						
 					
 				});
 		
@@ -193,7 +191,7 @@ function openTab(data){
 				
 						
 					
-					console.log("Script executed",results)
+					
 				
 				
 				// Now, do something with result.title and result.description
@@ -250,7 +248,7 @@ function openTab(data){
 					console.log("Error", xhr.statusText)
 				}
 	 
-			  console.log(imageResponse)
+			  
 			callback(imageResponse)
 			
 				
@@ -288,7 +286,7 @@ chrome.runtime.onMessage.addListener(
 				
 				
 				if(imageResponse.contentimgurls.length > 0){
-					console.log("Sending back",sendResponse)
+					
 					
 					sendResponse({"status":0,"contentimgurls":imageResponse.contentimgurls,"thumbimgurls":imageResponse.thumbimgurls});
 					}

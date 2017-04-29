@@ -543,8 +543,7 @@ if (undefined == builder) {
 					
 					
 							chrome.runtime.sendMessage(request, function(response) {
-  													console.log("fetching picasa response")
-													console.log("fetch response",response)
+  													
 													if(response.status != 0 ){
 														
 														alert("Error retrieving picasa album" + response.msg);
