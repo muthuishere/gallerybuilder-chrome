@@ -39,6 +39,7 @@ chrome.contextMenus.create({
 
 				//if image data is picasa wait for creati
 				global.findpicasaData(e.srcUrl,curtab)
+				global.findflickrData(e.srcUrl,curtab)
 			
        		 showGenerateGallery(encodeURI(e.srcUrl),encodeURI(e.pageUrl));
     }
@@ -70,6 +71,95 @@ var global=
 		auth:""
 		
 	},
+	lastFlickrData:{
+		
+		album:"",
+		auth:""
+		
+	},
+	findflickrData:function(imgUrl,tab){
+		
+		
+		if(imgUrl.indexOf(".flickr.com") < 0){
+			return;
+		}
+			var code = tosingleline(function() {/*!
+	
+						
+						var credentials={}
+						
+			
+			function stripforAfter(txt,htmlcontent){
+				
+						var content=htmlcontent
+						content=content.split(txt)[1]
+						content=content.replace(/\n/g, ",");
+						
+						content=content.split(",")[0]
+						
+						//content=content.replace(/[^a-zA-Z0-9&=]/g, "")
+						
+						content=content.replace(/'|"|,|:| /g,'');
+						
+						return content
+						
+						
+			}
+			for(var i=0;i<document.querySelectorAll("script").length;i++){
+				var curscript=document.querySelectorAll("script")[i];
+				if(curscript.hasAttribute("src") == false && curscript.innerHTML.indexOf("apiKey") > 0  && curscript.innerHTML.indexOf("photosetId") > 0 ){
+					
+					
+					
+					
+						
+						
+						credentials.auth=stripforAfter("apiKey",curscript.innerHTML)
+						
+						credentials.album=stripforAfter("photosetId",curscript.innerHTML)
+						
+						console.log(credentials)
+						
+						
+						
+							
+					
+				}
+			}
+		 ({
+              credentials: credentials || ""
+           });*/});
+
+
+
+		   
+	
+			
+	
+			chrome.tabs.executeScript(tab.id,{
+				code: code
+			}, function(results) {
+				
+				if(results && results.length >0){
+					
+					
+					
+					
+					
+							global.lastFlickrData.album=results[0].credentials.album
+							global.lastFlickrData.auth=results[0].credentials.auth
+		
+		
+		
+				}
+				
+						
+					
+				});
+		
+	},
+
+
 	findpicasaData:function(imgUrl,tab){
 		
 		
@@ -230,7 +320,7 @@ function openTab(data){
 
 	var xmlDoc;
 	
-	function ajaxreq(url,callback){
+	function fetchAndParsePicasa(url,callback){
 		
 		
 		var imageResponse={}
@@ -289,6 +379,70 @@ function openTab(data){
 
 	}
 	
+	function fetchAndParseFlickr(album,auth,callback){
+		
+		
+		var cururl="https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&extras=url_o&api_key=" + auth + "&photoset_id=" + album;
+		console.log("cururl",cururl)
+		var imageResponse={}
+		imageResponse.thumbimgurls=[]
+		imageResponse.contentimgurls=[]
+		imageResponse.error=""
+		
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", cururl, true);
+		xhr.setRequestHeader('Content-Type', 'text/xml');
+		xhr.onreadystatechange = function() {
+		  if (xhr.readyState == 4) {
+			  
+			  if (xhr.status === 200) {
+					
+					xmlDoc = xhr.responseXML;
+						
+						for(var k=0;k<xmlDoc.getElementsByTagName("photo").length;k++){
+							
+							var entry=xmlDoc.getElementsByTagName("photo")[k];
+								var img={};
+								
+								var contentimg=entry.getAttribute("url_o") 
+								var thumbimg='http://farm' + entry.getAttribute("farm") + '.static.flickr.com/' + entry.getAttribute("server") + '/' + entry.getAttribute("id") + '_' + entry.getAttribute("secret") + '_s.jpg'
+
+								/*
+								  var arr=contentimg.split("/")
+									arr[arr.length-1]="s3200/"+arr[arr.length-1]
+									
+									contentimg=arr.join("/")
+									*/
+									
+	//'http://farm' + item.farm + '.static.flickr.com/' + item.server + '/' + item.id + '_' + item.secret + '_s.jpg'
+								imageResponse.contentimgurls.push(contentimg);
+								imageResponse.thumbimgurls.push(thumbimg);
+								
+								
+								
+							
+						}
+		
+			
+			
+				} else {
+					
+					
+					imageResponse.error=xhr.statusText
+					console.log("Error", xhr.statusText)
+				}
+	 
+			  
+			callback(imageResponse)
+			
+				
+			
+		  }
+		}
+		xhr.send();
+
+	}
+	
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
    
@@ -313,7 +467,7 @@ chrome.runtime.onMessage.addListener(
 			
 	
 			
-			ajaxreq(url,function(imageResponse){
+			fetchAndParsePicasa(url,function(imageResponse){
 				
 				
 				if(imageResponse.contentimgurls.length > 0){
@@ -330,6 +484,33 @@ chrome.runtime.onMessage.addListener(
 		return true;
 		
     break;	
+ 
+ case 'fetchflickr':
+			
+			
+			global.lastFlickrData.auth=request.auth
+			global.lastFlickrData.album=request.album
+			
+			console.log("request",request)
+			
+			fetchAndParseFlickr(request.album,request.auth,function(imageResponse){
+				
+				
+				if(imageResponse.contentimgurls.length > 0){
+					
+					
+					sendResponse({"status":0,"contentimgurls":imageResponse.contentimgurls,"thumbimgurls":imageResponse.thumbimgurls});
+					}
+				else
+					sendResponse({"status":-1,"msg":imageResponse.error});
+
+			
+				
+			});
+		return true;
+		
+    break;	
+	
  
 
 }
@@ -357,7 +538,11 @@ var response={};
 		
 		sendResponse(global.lastPicasaData);
 		break;	
-	
+	case 'lastflickrdata':
+    
+		
+		sendResponse(global.lastFlickrData);
+		break;
 		
  
   default:

@@ -137,6 +137,30 @@ if (undefined == builder) {
 					
 			
 		},
+		findFlickrData(){
+			
+				//Settimeout for 3 seconds and call init data 
+				chrome.runtime.sendMessage({"action":"lastflickrdata"}, function(response) {
+  													
+													console.log("last flickr data",response)
+													$("#inputflickralbumid").val(response.album) 
+													$("#inputflickrauthid").val(response.auth) 
+												builder.retrycount+=1;
+												
+												if(response.album == "" && builder.retrycount < builder.MAX_RETRY_COUNT)
+													setTimeout(function(){ builder.findFlickrData(); }, 500);
+												else{
+													
+													//Initiate preview
+												
+													$( ".btnflickrfetch" ).trigger( "click" );
+													
+												}
+													
+					});
+					
+			
+		},
 		generateScript(data,callback){
 
 			//Get the pair
@@ -470,16 +494,17 @@ if (undefined == builder) {
 
 		},
 		
-		switchpicasabuildbuttons(flgshowbuild){
+		switchbuildbuttons(apitype,flgshowbuild){
+			
 			
 			if(flgshowbuild){
-				$( ".btnpicasafetch" ).css("display","none")
-				$( ".btnpicasabuild" ).css("display","")
+				$( ".btn"+apitype+"fetch" ).css("display","none")
+				$( ".btn"+apitype+"build" ).css("display","")
 				
 			}else{
 				
-				$( ".btnpicasafetch" ).css("display","")
-				$( ".btnpicasabuild" ).css("display","none")
+				$( ".btn"+apitype+"fetch" ).css("display","")
+				$( ".btn"+apitype+"build" ).css("display","none")
 			}
 				
 		},
@@ -616,7 +641,8 @@ if (undefined == builder) {
 														
 															
 													}
-													builder.switchpicasabuildbuttons(true);
+													
+													builder.switchbuildbuttons("picasa",true);
 													
 												});
 												
@@ -672,6 +698,120 @@ if (undefined == builder) {
 		
 		
 				
+						
+				$( ".btnflickrfetch" ).click(function() {
+					
+					
+					
+					
+					
+					if($("#inputflickruserid").val() == "" || $("#inputflickralbumid").val() == "" ){
+						
+						alert("User and album cannot be empty")
+						return;
+					}
+					
+					
+					
+					   var $this = $(this);
+						$this.button('loading');
+
+   
+					var request={};
+					
+					request.action="fetchflickr"
+					
+					request.album=$("#inputflickralbumid").val(); 
+					request.auth=$("#inputflickrauthid").val() ;
+					
+					
+					
+					
+														builder.clearImageUrls("THUMB")
+															builder.clearImageUrls("CONTENT")
+															
+							chrome.runtime.sendMessage(request, function(response) {
+  													
+													  $this.button('reset');
+													  
+													if(response.status != 0 ){
+														
+														
+														alert("Error retrieving flickr album" + response.msg);
+														return;
+													}
+													//
+													
+													
+													
+													
+													if($("#useboth").val()  == "TRUE"){
+														
+															builder.fillimageUrls(response.thumbimgurls,"THUMB")
+															builder.fillimageUrls(response.contentimgurls,"CONTENT")	
+														
+													}else{
+														
+														builder.fillimageUrls(response.contentimgurls,"THUMB")
+														
+															
+													}
+													builder.switchbuildbuttons("flickr",true);
+													
+												});
+												
+										
+												
+												
+					
+				});
+				
+				
+						
+			$( ".btnflickrbuild" ).click(function() {
+				
+					//Get array of thumbnails & content lstContentImages
+
+					//if its available send to back ground 
+
+					var request={}
+					request.action="build"
+
+					request.referrer= "about:blank"
+					
+
+				
+					
+					var galleryHTML=""
+
+					for(var t=0;t<builder.thumbImgUrls.length;t++){
+
+						
+
+						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
+						
+					}
+
+					if(request.referrer == ""){
+						document.body.innerHTML=galleryHTML;
+						return;
+						}
+
+
+					request.galleryHTML=galleryHTML
+
+
+
+					chrome.runtime.sendMessage(request, function(response) {
+  													//////console.log(response);
+													  window.close();
+												});
+
+				
+		});
+		
+		
+		
 			$( ".btnbuild" ).click(function() {
 				
 					//Get array of thumbnails & content lstContentImages
@@ -718,26 +858,42 @@ if (undefined == builder) {
 			$( ".input-picasa" ).change(function() {
 				
 				//On change input make fetch button visible
-				builder.switchpicasabuildbuttons(false)
+				builder.switchbuildbuttons("picasa",false)
 				
-		});
+			});
 		
-		builder.switchpicasabuildbuttons(false)
+			builder.switchbuildbuttons("picasa",false)
 		
 		
 
 			builder.parseImgData($( "#inputthumblg" ).val(),"THUMB")
 
+			$( ".input-flickr" ).change(function() {
+				
+				//On change input make fetch button visible
+				builder.switchbuildbuttons("flickr",false)
+				
+			});
+		
+			builder.switchbuildbuttons("flickr",false)
+			
 
 		if(imgUrl.indexOf(".googleusercontent.com") > 0){
-					$('.nav-tabs a[href="#picasa"]').tab('show')
-					
-					
+					$('.nav-tabs a[href="#picasa"]').tab('show');
 					builder.findPicasaData();
 					
 					
 				
 			}
+			
+			if(imgUrl.indexOf("flickr.com") > 0){
+					$('.nav-tabs a[href="#flickr"]').tab('show');
+					builder.findFlickrData();
+					
+					
+				
+			}
+			
 		
 		}
 	}
