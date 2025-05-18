@@ -1,902 +1,301 @@
-
 if (undefined == builder) {
 
-	var Helper ={
-
-		isLetter:function (str) {
-  				return str.length === 1 && str.match(/[a-z]/i);
+	var Helper = {
+		getParameterByName: function(name) {
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+				results = regex.exec(location.search);
+			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		},
-		isNumber:function (str) {
-  				 return !isNaN(parseFloat(str)) 
-		},
-		startsWith:function(str,val){
-
-			return str.indexOf(val) == 0;
-		},
-		decimalCount:function(num) {
-  					return (num.split('.')[1] || []).length;
-		},
-		getParameterByName:function (name, url) {
-			if (!url) {
-			url = window.location.href;
-			}
-			name = name.replace(/[\[\]]/g, "\\$&");
-			var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-				results = regex.exec(url);
-			if (!results) return null;
-			if (!results[2]) return '';
-			return decodeURIComponent(results[2].replace(/\+/g, " "));
-		},
-		padNumber:function(str,count){
-
-			var result=str;
-
-			for(i=str.length ; i<count;i++){
-				result ="0"+result;
-
-			}
-			return result;
-
-		},
-		canDecrement:function(start,end) {
-			 if(Helper.isLetter(start) && Helper.isLetter(end)  )
-					return   end.charCodeAt(0) < start.charCodeAt(0)
-
-
-			 if(Helper.isNumber(start) && Helper.isNumber(end)  )
-				 	return parseFloat(end) < parseFloat(start)
-			 
-
-		},
-		countDifference:function(start,end,jumpCount) {
-
-
-			if(Helper.canDecrement(start,end)){
-						var tmp  = start
-						start=end
-						end = tmp
-
-						}
-						
-			 if(Helper.isLetter(start) && Helper.isLetter(end)  )
-					return  Math.abs(end.charCodeAt(0) - start.charCodeAt(0)) + 1
-
-
-			 if(Helper.isNumber(start) && Helper.isNumber(end)  )
-				 	return (Math.abs((parseFloat(end) - parseFloat(start)) + 1)/jumpCount)
-			 
 		
-			return -1;
-
+		startsWith: function(str, pattern) {
+			if(!str)
+				return false;
+				
+			return str.indexOf(pattern) === 0
 		},
-	
-		 nextValue:function(str,jumpCount) {
+		
+		padNumber: function(num, size) {
+			var s = num+"";
+			while (s.length < size) s = "0" + s;
+			return s;
+		},
 
-			 
-			 if(Helper.isLetter(str) )
-    				return String.fromCharCode(str.charCodeAt(0) + jumpCount);
+		incrementCharacterByJump: function(c, jumpCount) {
+			return String.fromCharCode(c.charCodeAt(0) + jumpCount);
+		},
 
-			
-			 if(Helper.isNumber(str)){
-					//Check padded 0 count
+		incrementNumber: function(str, jumpCount) {
+			//Check padded 0 count
+			var padCount = 0;
 
-					var padCount=0;
+			if(Helper.startsWith(str+"", "0")) {
+				//find padded value 
+				padCount = str.length;
+			}
 
-					if(Helper.startsWith(str+"","0")){
-
-						//find padded value 
-						padCount=str.length;
-							
-					}
-
-					var nextVal="" + (parseFloat(str) + jumpCount)
-
-						
-					return Helper.padNumber(nextVal,padCount);
-					
-
-			 }		
-
-				return -1;	
+			var nextVal = "" + (parseInt(str) + jumpCount);
+			return Helper.padNumber(nextVal, padCount);
 		}
-
-	}
-
-
-
+	};
 
 	var builder = {
-
-		methods : [],
-		retrycount:0,
-		MAX_RETRY_COUNT:6,
+		methods: [],
+		retrycount: 0,
+		MAX_RETRY_COUNT: 6,
 		
-		thumbImgUrls:[],
-		contentImgUrls:[],
-		findPicasaData(){
-			
-				//Settimeout for 3 seconds and call init data 
-				chrome.runtime.sendMessage({"action":"lastpicasadata"}, function(response) {
-  													
-													$("#inputpicasauserid").val(response.user) 
-													$("#inputpicasaalbumid").val(response.album) 
-													$("#inputpicasaauthid").val(response.auth) 
-												builder.retrycount+=1;
-												
-												if(response.user == "" && builder.retrycount < builder.MAX_RETRY_COUNT)
-													setTimeout(function(){ builder.findPicasaData(); }, 500);
-												else{
-													
-													//Initiate preview
-												
-													$( ".btnpicasafetch" ).trigger( "click" );
-													
-												}
-													
-					});
-					
-			
-		},
-		findFlickrData(){
-			
-				//Settimeout for 3 seconds and call init data 
-				chrome.runtime.sendMessage({"action":"lastflickrdata"}, function(response) {
-  													
-													console.log("last flickr data",response)
-													$("#inputflickralbumid").val(response.album) 
-													$("#inputflickrauthid").val(response.auth) 
-												builder.retrycount+=1;
-												
-												if(response.album == "" && builder.retrycount < builder.MAX_RETRY_COUNT)
-													setTimeout(function(){ builder.findFlickrData(); }, 500);
-												else{
-													
-													//Initiate preview
-												
-													$( ".btnflickrfetch" ).trigger( "click" );
-													
-												}
-													
-					});
-					
-			
-		},
-		generateScript(data,callback){
-
-			//Get the pair
-
-			
+		thumbImgUrls: [],
+		contentImgUrls: [],
 		
+		generateScript: function(data, callback) {
+			var retscript = "";
 			
-			var templates=data.templates;
-			var pairs=data.pairs;
-
-			var pair=data.pairs[data.pairindex];
-
-			var scriptstring="#SCRIPT" + data.pairindex;
-			
-			
-
-				var pairarray=pair.replace("[","").replace("]","").split(";")
-
-			
-
-				var limits=pairarray[0].split("-")
-
-				if(limits.length < 1){
-					callback({"status":-1,"msg":"Invalid limit identified"})
-						return;
-					}
-
-
-					var start=limits[0]
-					var end=limits[1]
-
-					var incrementBy=1;
-					if(pairarray.length > 1){
-
-						incrementBy=parseFloat(pairarray[1])
-					}
-
-							
-					
-
-					
-
-						
-					
-
-					var total = Helper.countDifference(start,end,incrementBy)
-
-
-				
-				if(Helper.canDecrement(start,end) && incrementBy > 0 )
-									incrementBy=incrementBy * -1;
-
-
-
-					if(Helper.isLetter(start) && !Helper.isLetter(end)){
-
-							callback({"status":-1,"msg":"Invalid Endlimit- End should be a character" + end})
-							return;
-
-						
-
-
-					}
-
-					if(total <= 0){
-						callback({"status":-1,"msg":"Invalid total element for " + start + "--> " + end})
-							return;
-					}
-
-					if(templates.length <= 0){
-						callback({"status":-1,"msg":"templates length cannot be empty"})
-							return;
-					}
-
-
-
-					var responses=[]
-
-					var nextVal=start;
-					var urltemplate=""
-
-						//console.log("templates" + templates.length + "total "+ total)	
-
-					for(k=0;k<templates.length;k++){
-						urltemplate=templates[k]
-
-						nextVal=start;
-						for(var s=0;s<total;s++){
-
-								
-								var changedTemplate=urltemplate.replace(scriptstring,nextVal)
-								
-							responses.push(changedTemplate);
-							var oldVal=nextVal
-							nextVal=Helper.nextValue(nextVal,incrementBy);
-							//console.log("oldVal" + oldVal + "nextVal "+ nextVal + " for scriptstring" +  scriptstring + "changedTemplate" + changedTemplate)	
-							
-
-
-						}
-
-					}
-					
-
-					data.templates=responses
-					
-
-					
-					data.pairindex=data.pairindex + 1;
-
-					if(data.pairindex >= data.pairs.length ){
-				
-								callback({"status":0,"msg":data})
-								return 
-					}else{
-						//console.log("going further with data",data)
-						builder.generateScript(data,callback);
-						return;
-					}
-
-				
-
-					// find scriptstring in url template 
-				
-
-			//split start , end and increment
-
-
-			//find numeric or character 
-
-
-		
-
-
-
-		},
-		populateUrlTemplate(urlchunks){
-			
-			var ulrs=[];
-			
-			var urlTemplate=""
-			
-			var scriptindex=0;
-			for(j=0;j<urlchunks.length;j++){
-				
-				var urlchunk=urlchunks[j]
-				
-				if(urlchunk.optype == "TEXT"){
-						urlTemplate = urlTemplate + urlchunk.content
-					
-				}else{
-					urlTemplate = urlTemplate +  "#SCRIPT" + scriptindex
-					scriptindex ++;
-				}
-				//Get array of object associated 
+			for (var count = 0; count < data.length; count++) {
+				var imgdata = data[count];
+				retscript = retscript + '<img src="' + imgdata + '" ></img>';
 			}
 			
-			//Now we have url template 
-			
-			//console.log("urltemplate" + urlTemplate)
-
-			//recursive generate 
-			return urlTemplate;
-
-
-
-			
+			callback(retscript);
 		},
-		parseImgData:function(value,opType){
-			//console.log(value)
-			
-			var curentOperations=[];
-			
+		
+		populateUrlTemplate: function(urlchunks) {
+			builder.clearImageUrls();
+			builder.generateScript(urlchunks, (script) => {});
+			builder.fillimageUrls(urlchunks);
+		},
+
+		parseImgData: function(value, opType) {
+			var curentOperations = [];
 			
 			builder.clearImageUrls(opType);
 			
+			var pairs = value.match(/\[(.*?)\]/g);
 			
-			var pairs = value.match(/\[(.*?)\]/g)
-			
-			if(pairs){
+			if(pairs) {
+				curentOperations = [];
 				
-				curentOperations=[];
+				var lastPairIndex = 0;
+				var mypair = 0;
+				var dummyurls = [];
 				
-				var lastPairIndex=0
-				var currentstr=value;
-				
-				for(i=0;i<pairs.length;i++){
+				for(var t = 0; t < pairs.length; t++) {
+					mypair = pairs[t];
 					
-					var beforestring = currentstr.substr(lastPairIndex, currentstr.indexOf(pairs[i]));
+					//split operation vs value 
+					var subparts = mypair.substring(1, mypair.length - 1).split("-");
 					
+					var curop = {};
 					
-					lastPairIndex=currentstr.indexOf(pairs[i]) + pairs[i].length  ;
+					curop.index = t;
+					curop.objectptr = {};
+					curop.start = subparts[0];
 					
-					var curposition=new Object();
-					curposition.optype="TEXT"
-					curposition.content=beforestring;
+					if(subparts.length > 1) {	
+						curop.end = subparts[1];
+					} else {
+						curop.end = subparts[0];
+					}
 					
-					curentOperations.push(curposition)
+					//Continue with the main operation
+					curentOperations.push(curop);
 					
-					var scriptpos=new Object();
-					scriptpos.optype="SCRIPT"
-					scriptpos.content=pairs[i];
+					var startindex = value.indexOf(mypair, lastPairIndex);
+					var textlen = subparts[0].length;
 					
-					curentOperations.push(scriptpos)
-					
-					currentstr=currentstr.substr(lastPairIndex)
-					
-					//console.log("beforestring" + beforestring +" pair "+  pairs[i] + " lastPairIndex" + lastPairIndex + "currentstr " + currentstr)
-
-					lastPairIndex=0;
-					//get string before pair after last pair index
-						//push into array 
-					//get pair
+					lastPairIndex = startindex + textlen + 3; //+1 for [  - ]
 				}
 				
-				if(currentstr  !== ""){
-				var afterString=currentstr;
+				// Set matchcount based on the range for numeric values
+				var matchcount = 10;
 				
-					var curposition=new Object();
-					curposition.optype="TEXT"
-					curposition.content=afterString;
+				if(pairs.length == 1) {
+					var curop = curentOperations[0];
 					
-					curentOperations.push(curposition);
+					var stepper = "";
+					
+					// Check if we need to pad with zeros
+					if(Helper.startsWith(curop.start+"", "0")) {
+						stepper = "0";
+					}
+					
+					// For numeric ranges, calculate the proper count
+					if(!isNaN(curop.start) && !isNaN(curop.end)) {
+						var startNum = parseInt(curop.start);
+						var endNum = parseInt(curop.end);
+						matchcount = Math.abs(endNum - startNum) + 1; // +1 to include both start and end values
+					}
+					
+					for(var t = 0; t < matchcount; t++) {
+						var filledVal = value.replace(pairs[0], curop.start);
+						
+						dummyurls.push(filledVal);
+						
+						//Check datatype 
+						if(!isNaN(curop.start) && !isNaN(curop.end)) {
+							if(parseInt(curop.start) < parseInt(curop.end)) {
+								curop.start = Helper.incrementNumber(curop.start+"", 1);
+							} else if(parseInt(curop.start) > parseInt(curop.end)) {
+								// Handle decreasing ranges if needed
+								curop.start = Helper.incrementNumber(curop.start+"", -1);
+							} else {
+								// Start and end are the same, so we're done
+								break;
+							}
+						} else {
+							curop.start = Helper.incrementCharacterByJump(curop.start+"", 1);
+						}
+					}
+				} else {
+					dummyurls.push(value);
 				}
-		
-			
-			
-
-			var urltemplate= builder.populateUrlTemplate(curentOperations)
-			var data={}
-			data.templates=[];
-			data.templates.push(urltemplate);
-			data.operationType=opType;
-			data.pairs=pairs;
-			data.pairindex=0;
-
-			builder.data=data;
-
-
-			
-			builder.generateScript(data,function(response){
-
-				//console.log("On complete",opType)
-
-				var imgUrls=[];
-				imgUrls.push(urltemplate);
-				if(response.status == 0){
-					imgUrls=data.templates;
-
-
-				}
 				
-				
-				builder.fillimageUrls(imgUrls,opType);
-			});
-
-
-			}else{
-
-				var imgUrls=[];
-				imgUrls.push(value);
-				
-				builder.fillimageUrls(imgUrls,opType);
+				//Populate the array with the results
+				builder.fillimageUrls(dummyurls, opType);
+			} else {
+				var dummyurls = [];
+				dummyurls.push(value);
+				builder.fillimageUrls(dummyurls, opType);
 			}
-			
-			
-			
-			
-		},
-		getContentImageUrl:function(index,imgUrl){
-			
-			if(builder.contentImgUrls.length < index && undefined != builder.contentImgUrls[index])
-				return '<a href="'+ builder.contentImgUrls[index]+'" target="_blank">' + imgUrl + '</a>'
-
-			return imgUrl	
 		},
 		
-		
-		clearImageUrls:function(operationType){
-			
-				var className=".lstThumbnails"
-			if(operationType == "CONTENT"){
-				className=".lstContentImages"
+		getContentImageUrl: function(index, t_content) {
+			var imgUrl = t_content;
 				
-			}
-			document.querySelector(className).innerHTML="";
+			if(builder.contentImgUrls && builder.contentImgUrls.length > 0 && builder.contentImgUrls.length > index)
+				imgUrl = '<a href="' + builder.contentImgUrls[index] + '" target="_blank">' + t_content + '</a>';
 			
-			
-			
+			return imgUrl;	
 		},
 		
-		fillimageUrls:function(imgUrls,operationType){
-
-
+		clearImageUrls: function(operationType) {
+			var className = ".lstThumbnails";
+			if(operationType == "CONTENT") {
+				className = ".lstContentImages";
+			}
+			document.querySelector(className).innerHTML = "";
+		},
 		
-			var className=".lstThumbnails"
-			if(operationType == "CONTENT"){
-				className=".lstContentImages"
-				builder.contentImgUrls=imgUrls
-			}else{
-
-				builder.thumbImgUrls=imgUrls
+		fillimageUrls: function(imgUrls, operationType) {
+			var className = ".lstThumbnails";
+			if(operationType == "CONTENT") {
+				className = ".lstContentImages";
+				builder.contentImgUrls = imgUrls;
+			} else {
+				builder.thumbImgUrls = imgUrls;
 			}
 
-	
-
-
-	
-
-
-
-			//document.querySelector(className).innerHTML="";
+			var listContainer = document.querySelector(className);
 			
-
-
-			for(var t=0;t<imgUrls.length;t++){
-
-				var existingHtml=$(className).html() 
-				$(className).html(existingHtml + '<a href="#" class="list-group-item lstpreview">'+imgUrls[t]+'</a>')
-			}
-
-
-		
-			$(".lstpreview").click(function(event) {
-				
-				
-				$(".imgpreview").attr("src",event.target.innerHTML)
-				return false;
+			for(var t = 0; t < imgUrls.length; t++) {
+				var listItem = document.createElement('a');
+				listItem.href = "#";
+				listItem.className = "list-group-item lstpreview";
+				listItem.textContent = imgUrls[t];
+				listItem.addEventListener('click', function(event) {
+					event.preventDefault();
+					document.querySelector(".imgpreview").src = event.target.textContent;
 				});
-
-
+				
+				listContainer.appendChild(listItem);
+			}
 		},
 		
-		switchbuildbuttons(apitype,flgshowbuild){
-			
-			
-			if(flgshowbuild){
-				$( ".btn"+apitype+"fetch" ).css("display","none")
-				$( ".btn"+apitype+"build" ).css("display","")
-				
-			}else{
-				
-				$( ".btn"+apitype+"fetch" ).css("display","")
-				$( ".btn"+apitype+"build" ).css("display","none")
-			}
-				
-		},
-	
-		init : function () {
+		init: function() {
+			document.addEventListener('DOMContentLoaded', function() {
+				var openGallery = Helper.getParameterByName("openGallery");
+				if(openGallery != null && openGallery != "" && openGallery == "true") {
+					var request = {};
+					request.action = "galleryData";
 
-			
-					
-					
-					
-			var openGallery=Helper.getParameterByName("openGallery") ;
-			if(openGallery != null && openGallery != "" && openGallery == "true"){
-					
-					
-					var request={}
-					request.action="galleryData"
-
-					
-					
-						chrome.runtime.sendMessage(request, function(response) {
-  													
-													 document.body.innerHTML=response.galleryHTML;
-												});
-												
-					
+					chrome.runtime.sendMessage(request, function(response) {
+						document.body.innerHTML = response.galleryHTML;
+					});
+						
 					return;
+				}
+				
+				// Always set to empty string regardless of URL parameters
+				document.getElementById("inputthumblg").value = "";
+				document.getElementById("referrer").value = "";
+				document.getElementById("inputcontentlg").value = "";
+				
+				// Clear the Images In Page input if it exists
+				if (document.getElementById("inputImagesInPage")) {
+					document.getElementById("inputImagesInPage").value = "";
+				}
 
-			}
+				document.getElementById("inputthumblg").addEventListener('change', function() {
+					setTimeout(() => {
+						builder.parseImgData(this.value, "THUMB");
+					}, 100);
+				});
+
+				document.getElementById("inputcontentlg").addEventListener('change', function() {
+					builder.parseImgData(this.value, "CONTENT");
+				});
 			
-	
-			var imgUrl=Helper.getParameterByName("id") ;
-			if(imgUrl != null && imgUrl != ""){
+				document.querySelector(".btnbuild").addEventListener('click', function() {
+					//Get array of thumbnails & content lstContentImages
+					//if its available send to back ground 
+					var request = {};
+					request.action = "build";
+					request.referrer = document.getElementById("referrer").value;
 					
-					
-		
-		
-					
-					$( "#inputthumblg" ).val(imgUrl)
+					var galleryHTML = "";
+					for(var t = 0; t < builder.thumbImgUrls.length; t++) {
+						galleryHTML = galleryHTML + builder.getContentImageUrl(t, '<img src="' + builder.thumbImgUrls[t] + '" ></img>');
+					}
 
-			}else{
-				
-				imgUrl="";
-			}
-				
-				
-		
-				var referrerurl=Helper.getParameterByName("referrerurl") ;
-			if(referrerurl != null && referrerurl != ""){
-					
-					$( "#referrer" ).val(referrerurl)
-
-			}
-
-			
-
-			
-		
-		
-			$( "#inputthumblg" ).change(function() {
-				
-				//Find Number of []
-				builder.parseImgData(this.value,"THUMB")
-				
-		});
-		
-		
-			$( "#inputcontentlg" ).change(function() {
-				
-				//Find Number of []
-				builder.parseImgData(this.value,"CONTENT")
-				
-		});
-
-		
-		
-		
-		
-		
-		
-				$( ".btnpicasafetch" ).click(function() {
-					
-					
-					
-					
-					
-					if($("#inputpicasauserid").val() == "" || $("#inputpicasaalbumid").val() == "" ){
-						
-						alert("User and album cannot be empty")
+					if(request.referrer == "") {
+						document.body.innerHTML = galleryHTML;
 						return;
 					}
-					
-					
-					
-					   var $this = $(this);
-						$this.button('loading');
 
-   
-					var request={};
-					
-					request.action="fetchpicasa"
-					request.user=$("#inputpicasauserid").val() ;
-					request.album=$("#inputpicasaalbumid").val(); 
-					request.auth=$("#inputpicasaauthid").val() ;
-					
-					
-					
-					
-														builder.clearImageUrls("THUMB")
-															builder.clearImageUrls("CONTENT")
-															
-							chrome.runtime.sendMessage(request, function(response) {
-  													
-													  $this.button('reset');
-													  
-													if(response.status != 0 ){
-														
-														
-														alert("Error retrieving picasa album" + response.msg);
-														return;
-													}
-													//
-													
-													
-													
-													
-													if($("#useboth").val()  == "TRUE"){
-														
-															builder.fillimageUrls(response.thumbimgurls,"THUMB")
-															builder.fillimageUrls(response.contentimgurls,"CONTENT")	
-														
-													}else{
-														
-														builder.fillimageUrls(response.contentimgurls,"THUMB")
-														
-															
-													}
-													
-													builder.switchbuildbuttons("picasa",true);
-													
-												});
-												
-										
-												
-												
-					
+					request.galleryHTML = galleryHTML;
+
+					chrome.runtime.sendMessage(request, function(response) {
+						window.close();
+					});
+				});
+			
+				// Setup tabs without jQuery
+				setupTabs();
+				
+				 // Don't parse any initial URL as we're starting with empty fields
+				builder.clearImageUrls("THUMB");
+				builder.clearImageUrls("CONTENT");
+			});
+		}
+	};
+
+	// Handle tab switching without jQuery
+	function setupTabs() {
+		var tabLinks = document.querySelectorAll('.nav-tabs a');
+		
+		for(var i = 0; i < tabLinks.length; i++) {
+			tabLinks[i].addEventListener('click', function(e) {
+				e.preventDefault();
+				
+				// Remove active class from all tabs
+				document.querySelectorAll('.nav-tabs li').forEach(function(tab) {
+					tab.classList.remove('active');
 				});
 				
-				
-						
-			$( ".btnpicasabuild" ).click(function() {
-				
-					//Get array of thumbnails & content lstContentImages
-
-					//if its available send to back ground 
-
-					var request={}
-					request.action="build"
-
-					request.referrer= "about:blank"
-					
-
-				
-					
-					var galleryHTML=""
-
-					for(var t=0;t<builder.thumbImgUrls.length;t++){
-
-						
-
-						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
-						
-					}
-
-					if(request.referrer == ""){
-						document.body.innerHTML=galleryHTML;
-						return;
-						}
-
-
-					request.galleryHTML=galleryHTML
-
-
-
-					chrome.runtime.sendMessage(request, function(response) {
-  													//////console.log(response);
-													  window.close();
-												});
-
-				
-		});
-		
-		
-				
-						
-				$( ".btnflickrfetch" ).click(function() {
-					
-					
-					
-					
-					
-					if($("#inputflickruserid").val() == "" || $("#inputflickralbumid").val() == "" ){
-						
-						alert("User and album cannot be empty")
-						return;
-					}
-					
-					
-					
-					   var $this = $(this);
-						$this.button('loading');
-
-   
-					var request={};
-					
-					request.action="fetchflickr"
-					
-					request.album=$("#inputflickralbumid").val(); 
-					request.auth=$("#inputflickrauthid").val() ;
-					
-					
-					
-					
-														builder.clearImageUrls("THUMB")
-															builder.clearImageUrls("CONTENT")
-															
-							chrome.runtime.sendMessage(request, function(response) {
-  													
-													  $this.button('reset');
-													  
-													if(response.status != 0 ){
-														
-														
-														alert("Error retrieving flickr album" + response.msg);
-														return;
-													}
-													//
-													
-													
-													
-													
-													if($("#useboth").val()  == "TRUE"){
-														
-															builder.fillimageUrls(response.thumbimgurls,"THUMB")
-															builder.fillimageUrls(response.contentimgurls,"CONTENT")	
-														
-													}else{
-														
-														builder.fillimageUrls(response.contentimgurls,"THUMB")
-														
-															
-													}
-													builder.switchbuildbuttons("flickr",true);
-													
-												});
-												
-										
-												
-												
-					
+				// Hide all tab panes
+				document.querySelectorAll('.tab-pane').forEach(function(pane) {
+					pane.classList.remove('active');
 				});
 				
+				// Add active class to clicked tab
+				this.parentElement.classList.add('active');
 				
-						
-			$( ".btnflickrbuild" ).click(function() {
-				
-					//Get array of thumbnails & content lstContentImages
-
-					//if its available send to back ground 
-
-					var request={}
-					request.action="build"
-
-					request.referrer= "about:blank"
-					
-
-				
-					
-					var galleryHTML=""
-
-					for(var t=0;t<builder.thumbImgUrls.length;t++){
-
-						
-
-						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
-						
-					}
-
-					if(request.referrer == ""){
-						document.body.innerHTML=galleryHTML;
-						return;
-						}
-
-
-					request.galleryHTML=galleryHTML
-
-
-
-					chrome.runtime.sendMessage(request, function(response) {
-  													//////console.log(response);
-													  window.close();
-												});
-
-				
-		});
-		
-		
-		
-			$( ".btnbuild" ).click(function() {
-				
-					//Get array of thumbnails & content lstContentImages
-
-					//if its available send to back ground 
-
-					var request={}
-					request.action="build"
-
-					request.referrer= $("#referrer").val() 
-					
-
-				
-					
-					var galleryHTML=""
-
-					for(var t=0;t<builder.thumbImgUrls.length;t++){
-
-						
-
-						galleryHTML= galleryHTML +  builder.getContentImageUrl(t,'<img src="'+ builder.thumbImgUrls[t]+'" ></img>')
-						
-					}
-
-					if(request.referrer == ""){
-						document.body.innerHTML=galleryHTML;
-						return;
-						}
-
-
-					request.galleryHTML=galleryHTML
-
-
-
-					chrome.runtime.sendMessage(request, function(response) {
-  													//////console.log(response);
-													  window.close();
-												});
-
-				
-		});
-
-		
-			$( ".input-picasa" ).change(function() {
-				
-				//On change input make fetch button visible
-				builder.switchbuildbuttons("picasa",false)
-				
+				// Show corresponding tab pane
+				var tabId = this.getAttribute('href').substring(1); // Remove the # from href
+				document.getElementById(tabId).classList.add('active');
 			});
-		
-			builder.switchbuildbuttons("picasa",false)
-		
-		
-
-			builder.parseImgData($( "#inputthumblg" ).val(),"THUMB")
-
-			$( ".input-flickr" ).change(function() {
-				
-				//On change input make fetch button visible
-				builder.switchbuildbuttons("flickr",false)
-				
-			});
-		
-			builder.switchbuildbuttons("flickr",false)
-			
-
-		if(imgUrl.indexOf(".googleusercontent.com") > 0){
-					$('.nav-tabs a[href="#picasa"]').tab('show');
-					builder.findPicasaData();
-					
-					
-				
-			}
-			
-			if(imgUrl.indexOf("flickr.com") > 0){
-					$('.nav-tabs a[href="#flickr"]').tab('show');
-					builder.findFlickrData();
-					
-					
-				
-			}
-			
-		
 		}
 	}
-	//builder.test();
-	builder.init()
+
+	// Initialize the builder
+	builder.init();
 }

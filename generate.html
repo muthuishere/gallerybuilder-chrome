@@ -4,215 +4,83 @@
   <title>Generate Gallery</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/bootcustom.css">
- <script src="scripts/jquery.min.js"></script>   
-  <script src="scripts/bootstrap.min.js"></script> 
-  
-  
+  <link rel="stylesheet" href="css/custom.css">
 </head>
-<body >
+<body>
 
 <div class="container">
   
   <h2 style="margin-bottom:30px"><img src="images/gallery-builder-38.png"/>Gallery Builder</h2>
-
-
-
    
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Build</a></li>
-    <li ><a data-toggle="tab" href="#picasa">Picasa API</a></li>    
-	<li ><a data-toggle="tab" href="#flickr">Flickr API</a></li>   
+  <ul class="nav-tabs">
+    <li class="active"><a href="#home">Build</a></li>
+    <li><a href="#imagesinpage">Images In Page</a></li>
   </ul>
 
   <div class="tab-content">
-    <div id="home" class="tab-pane fade in active ">
-      
-  
+    <div id="home" class="tab-pane active">
+      <h4>Enter Image URL template with [] for dynamic values</h4>
 	  
-	  
-	
-
-	   <div class="form-group">
-    <h4>Thumbnail URL</h4>
-    <input class="form-control input-lg" id="inputthumblg" placeholder="Enter URL parameters marked with [0-9;1],[a-z]...."  type="text" data-tmpvalue="http://muthu.com/images/image[00-98;1]/id_[1-4]t">
-  </div>
-  
-  <div class="form-group">
-    <h4>Content URL</h4>
-    <input class="form-control input-lg" id="inputcontentlg" placeholder="Enter URL parameters marked with [0-9;1],[a-z]...."  type="text">
-  </div>
-  
- 
-
-   <div class="form-group">
-     <h4>Referrer</h4>
-    <div class="row">
-			<div class="col-md-8 ">  <input class="form-control input-lg" id="referrer" placeholder="Enter referrer url"  type="text"></div>
-			<div class="col-md-4  "> <button type="button" class="btn btn-primary pull-right btnbuild">Build Now</button></div>
-  </div>
-   </div>
-  
-  
-
-	
-
-    </div>
-    
-	
-	    <div id="picasa" class="tab-pane fade in ">
-      
-  
-	  
-	
-
-
 <div class="form-group">
-    <h4>User Id</h4>
-    <input class="form-control input-lg input-picasa" id="inputpicasauserid" placeholder="Enter userid"  type="text" />
+    <label for="inputthumblg">Preview Image URL</label>
+    <input class="form-control input-lg" id="inputthumblg" placeholder="Enter Preview Thumbnail URL" type="text" />
   </div>
-  
+  <div id="dynamicrows"></div>
   <div class="form-group">
-    <h4>Album ID</h4>
-    <input class="form-control input-lg input-picasa" id="inputpicasaalbumid" placeholder="Enter albumid"  type="text"/>
+    <label for="inputcontentlg">Content Image URL</label>
+    <input class="form-control input-lg" id="inputcontentlg" placeholder="Enter Content Image URL" type="text" />
   </div>
-  
- 
-
-   <div class="form-group">
-     <h4>AuthID</h4>
+  <div class="form-group">
+    <h5>Referring Page URL</h5>
+    <input class="form-control" id="referrer" placeholder="Enter Referring URL" type="text" />
+  </div>
+  <div class="form-group">
+     <h5>Preview</h5>
     <div class="row">
-			<div class="col-md-4 "> <input class="form-control input-lg input-picasa" id="inputpicasaauthid" placeholder="Enter Auth ID"  type="text"/>
-	
-	
-			</div>
-						<div class="checkbox col-md-4">
-			<label><input type="checkbox" id="useboth"  value="useboth">Fetch Thumbnail & Image</label>
-	</div>
-			<div class="col-md-4  ">
-
-			
-			
-			<button type="button" class="btn btn-primary btn-lg  pull-right  btnpicasafetch" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Fetching Images from Picasa">Fetch Preview</button>
-			
-			
-			<button type="button" class="btn btn-primary pull-right btnpicasabuild" >Build</button>
-			
-			
-			</div>
+      <div class="col-md-4" style="height:270px;overflow-y: auto;">
+      <div class="list-group lstThumbnails">
+      </div>
+      </div>
+      <div class="col-md-4" style="height:270px;overflow-y: auto;">
+      <div class="list-group lstContentImages">
+      </div>
+      </div>
+      <div class="col-md-4">
+      <img class="img-responsive imgpreview" style="width: 100%; margin-top: 1em;" />
+      </div>
+    </div>
   </div>
+   <div class="form-group">
+    <div class="row">
+      <div class="col-md-8"> <img src="images/blank.png" alt="" /></div>
+      <div class="col-md-4"> <button type="button" class="btn btn-primary pull-right btnbuild">Build Now</button></div>
+    </div>
    </div>
-  
-  
-
-	
-
     </div>
     
-	
-	   <div id="flickr" class="tab-pane fade in ">
+    <div id="imagesinpage" class="tab-pane">
+      <div class="form-group">
+        <h4>Website URL</h4>
+        <div class="col-md-4"> 
+          <input class="form-control input-lg" id="inputImagesInPage" placeholder="Enter Website URL" type="text"/>
+        </div>
+      </div>
       
-  
-	  
-	
-
-
-
-  <div class="form-group">
-    <h4>Photoset ID</h4>
-    <input class="form-control input-lg input-flickr" id="inputflickralbumid" placeholder="Enter albumid"  type="text"/>
-  </div>
-  
- 
-
-   <div class="form-group">
-     <h4>AuthID</h4>
-    <div class="row">
-			<div class="col-md-4 "> <input class="form-control input-lg input-picasa" id="inputflickrauthid" placeholder="Enter Auth ID"  type="text"/>
-	
-	
-			</div>
-						<div class="checkbox col-md-4">
-			<label><input type="checkbox" id="useflickrboth"  value="useboth">Fetch Thumbnail & Image</label>
-	</div>
-			<div class="col-md-4  ">
-
-			
-			
-			<button type="button" class="btn btn-primary btn-lg  pull-right  btnflickrfetch" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Fetching Images from Flickr">Fetch Preview</button>
-			
-			
-			<button type="button" class="btn btn-primary pull-right btnflickrbuild" >Build</button>
-			
-			
-			</div>
-  </div>
-   </div>
-  
-  
-
-	
-
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-4">
+            <button type="button" class="btn btn-primary btn-lg pull-right btnImagesInPagefetch">Fetch Preview</button>
+            <button type="button" class="btn btn-primary pull-right btnImagesInPageBuild">Fetch</button>
+          </div>
+        </div>
+      </div>
     </div>
-    
-
-
   </div>
-    
-   <div class="form-group">
-     <h4>Preview</h4>
-    
-   </div>
-
-	  <div id="tbl" >
-	  
-	  
-	  <div  class="pre-scrollable rounded" style="border:1px solid #000;height:400px;overflow-x:hidden;">
-		<div class="row">
-			<div class="col-md-6 ">
-				
-				<p align="center"><strong>ThumbURL</strong></p>
-
-<div class="list-group lstThumbnails">
-<!-- <a href="#" class="list-group-item">fdSecond item</a>
-<a href="#" class="list-group-item">Second item</a> -->
-	</div>
-
-
-			</div>
-			
-			<div class="col-md-6">
-<p align="center"><strong>ContentURL</strong></p>
-				<div class="list-group lstContentImages" >
-<!-- <a href="#" class="list-group-item">Second item</a>
-<a href="#" class="list-group-item">Sffecond item</a> -->
-	</div>
-
-			</div>
-		</div>
-
-
 </div>
 
-		
-	</div>
-	<br/></br/>
-		<div  class="pre-scrollable " style="border:1px solid #000;height:400px;overflow-x:hidden;">
-		<div class="row">
-			<div class="col-md-12">
-				<img class="imgpreview" src="images/blank.png">
-				 </div>
-			</div>
-		
-	</div>
-	
-		
-		
-</div>
+<script src="scripts/galleryBuilder.js"></script>
+<script src="scripts/ImagesInPageBuilder.js"></script>
+<script src="scripts/generateoptions.js"></script> 
 
-  <script src="scripts/generateoptions.js"></script>
- 
-  
 </body>
 </html>

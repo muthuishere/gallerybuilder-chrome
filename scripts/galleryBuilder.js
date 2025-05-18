@@ -3,18 +3,15 @@ if (undefined == GalleryBuilder) {
 	var CustomFunctions = {
 
 		Number : function (value) {
-				
 				return value;
 		},
 		Character : function (index) {
 				return String.fromCharCode(index);
 		},
 		shortMonth : function (index) {
-		
 			return 	DataTypes.getMonthName(index-1,DataTypes.MONTH_SHORT)
 		},
 		longMonth : function (index) {
-		
 			return 	DataTypes.getMonthName(index-1,DataTypes.MONTH_LONG)
 		}
 
@@ -235,7 +232,7 @@ if (undefined == GalleryBuilder) {
 
 			//Ranges has all the urls
 			//ranges
-			var results = generateurls(template,0,ranges)
+			var results = GalleryBuilder.generateurls(template,0,ranges)
 			console.log(results)
 
 		},
@@ -254,60 +251,54 @@ if (undefined == GalleryBuilder) {
 		},
 
 		generateurls : function (template, pointer, ranges) {
+			var cururl = template;
+			var results = [];
+			var range = ranges[pointer];
+			var currenturl = template;
 
-			var cururl = template
-
-				var results = []
-
-				var range = ranges[pointer]
-				var currenturl = template
-
-				currenturl = template
-
-				var index = 0
-				var curindex = range.start 
+			var startVal = parseInt(range.start);
+			var endVal = parseInt(range.end);
+			var increment = parseInt(range.increment);
+			
+			// Fix: Calculate count properly based on start and end values
+			var count = Math.abs(endVal - startVal) + 1; // +1 to include both start and end values
+			
+			for (var i = 0; i < count; i++) {
+				var curindex = startVal + (i * increment);
 				
-				var count=range.length
+				// Stop if we've gone past the end value
+				if ((increment > 0 && curindex > endVal) || (increment < 0 && curindex < endVal)) {
+					break;
+				}
 				
-				if(range.length < 0)
-					count = range.length * -1 
+				var curval;
+				if (range.datatype == DataTypes.CHARACTER) {
+					curval = String.fromCharCode(curindex);
+				} else if (range.datatype == DataTypes.NUMBER) {
+					var method = GalleryBuilder.getFunctionFromString("CustomFunctions." + range.methodname);
 					
-					
-				while (index < range.length) {
-
-					if (range.datatype == DataTypes.CHARACTER) {
-						curval = String.fromCharCode(curindex);
-
-					} else if (range.datatype == DataTypes.NUMBER) {
-					
-						var method=GalleryBuilder.getFunctionFromString("CustomFunctions." + range.methodname)
-						
-						if(method)
-							curval = method(curindex)
-						else
-							alert("Invalid function noted")
-
-					} else if (range.datatype == DataTypes.MONTH_SHORT) {
-
-						curval = DataTypes.getMonthName(curindex, DataTypes.MONTH_SHORT)
-
-					} else if (range.datatype == DataTypes.MONTH_LONG) {
-
-						curval = DataTypes.getMonthName(curindex, DataTypes.MONTH_LONG)
-					}
-
-					cururl = cururl.replace(GalleryBuilder.delimeter, curval)
-
-						if (cururl.indexOf(GalleryBuilder.delimeter) > 0) {
-
-							results = results.concat(generateurls(cururl, pointer + 1, ranges));
-						} else
-							results.push(cururl)
-
-							curindex = curindex + range.increment
-								index++
+					if(method)
+						curval = method(curindex);
+					else
+						alert("Invalid function noted");
+				} else if (range.datatype == DataTypes.MONTH_SHORT) {
+					curval = DataTypes.getMonthName(curindex, DataTypes.MONTH_SHORT);
+				} else if (range.datatype == DataTypes.MONTH_LONG) {
+					curval = DataTypes.getMonthName(curindex, DataTypes.MONTH_LONG);
 				}
 
+				var nextUrl = currenturl.replace(GalleryBuilder.delimeter, curval);
+					
+				if (nextUrl.indexOf(GalleryBuilder.delimeter) > 0) {
+					// There are more placeholders to replace, recursively call
+					results = results.concat(GalleryBuilder.generateurls(nextUrl, pointer + 1, ranges));
+				} else {
+					// This is a complete URL
+					results.push(nextUrl);
+				}
+			}
+			
+			return results;
 		},
 		getMethodhelptext:function (name){
 			
@@ -326,17 +317,11 @@ if (undefined == GalleryBuilder) {
 			return res;
 		},
 		init : function () {
-		
 			GalleryBuilder.methods=GalleryBuilder.getMethods()
-		
-		
 		}
-
 	}
 
 	window.addEventListener('load', GalleryBuilder.init);
 
 	//document.body.addEventListener("load", authHandler.init(), false);
-
-
 }
